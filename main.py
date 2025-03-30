@@ -1,19 +1,28 @@
-import discord  
+import discord
+from discord.ext import commands
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
-token = os.getenv("TOKEN")
-
-class Client(discord.Client):
-    async def on_ready(self):
-        print(f'Started as {self.user}')
-
-    async def on_message(self,message):
-        print(f'{message.author}: {message.content}')
+TOKEN = os.getenv("TOKEN")
+GUILD_ID = int(os.getenv("GUILDID"))
 
 intents = discord.Intents.default()
 intents.message_content = True
 
-client = Client(intents=intents)
+bot = commands.Bot(command_prefix="", intents=intents)
 
-client.run(token)
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user}")
+
+@bot.event
+async def setup_hook():
+    for filename in os.listdir("./commands"):
+        if filename.endswith(".py"):
+            await bot.load_extension(f"commands.{filename[:-3]}")
+
+    guild = discord.Object(id=GUILD_ID)
+    await bot.tree.sync(guild=guild)
+
+bot.run(TOKEN)
