@@ -19,6 +19,7 @@ class FrontDoor(discord.ui.Modal):
         username = discord.ui.TextInput(
             label='Roblox Username',
             placeholder='Enter your Roblox name',
+            max_length=20,
             required=True
         )
         reason = discord.ui.TextInput(
@@ -31,6 +32,7 @@ class FrontDoor(discord.ui.Modal):
         inviter = discord.ui.TextInput(
             label='Referrer',
             placeholder='Who invited you or how did you find us?',
+            max_length=25,
             required=True
         )
 
