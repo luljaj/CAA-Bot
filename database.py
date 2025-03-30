@@ -9,6 +9,7 @@ cursor = conn.cursor()
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS applications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    discordid INT,
     username TEXT,
     reason TEXT,
     inviter TEXT,
