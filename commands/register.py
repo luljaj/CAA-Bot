@@ -9,6 +9,7 @@ db_file = os.path.join(db_folder, 'applications.db')
 GUILD_ID = int(os.getenv("GUILDID"))
 REVIEW_CHANNEL = 1356017239039414615
 INTERN_ID = 1356349048516382781
+FRONTDOOR_ID = 1355935366867062826
 
 
 class FrontDoor(discord.ui.Modal):
@@ -88,7 +89,7 @@ class FrontDoor(discord.ui.Modal):
                 self.stop()
                 await interaction.response.send_message(content=f'<@{self.user.id}> ({self.rbluser}) has been promoted to Intern.')
                 intern = discord.utils.get(interaction.guild.roles, name="Intern")
-                await self.user.add_roles(intern)
+                await self.user.add_roles(intern, reason = f'Promoted by <@{interaction.user.id}>')
                 await self.user.edit(nick=self.rbluser)
             @discord.ui.button(label='Deny', style=discord.ButtonStyle.red)
             async def on_denial(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -107,7 +108,10 @@ class Register(commands.Cog):
     @app_commands.command(name="register", description="Fill out a form to apply.")
     @app_commands.guilds(Object(id=GUILD_ID))
     async def register_modal(self, interaction: Interaction):
-        await interaction.response.send_modal(FrontDoor(self.bot))
+        if interaction.channel.name == "the-front-door":
+            await interaction.response.send_modal(FrontDoor(self.bot))
+        else:
+            await interaction.response.send_message(f'You are already in.', ephemeral= True)
 
 
 async def setup(bot):
