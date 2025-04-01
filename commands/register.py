@@ -5,7 +5,7 @@ import sqlite3
 import discord
 
 db_folder = './databases'
-db_file = os.path.join(db_folder, 'applications.db')
+db_file = os.path.join(db_folder, 'database.db')
 GUILD_ID = int(os.getenv("GUILDID"))
 REVIEW_CHANNEL = 1356017239039414615
 INTERN_ID = 1356349048516382781
@@ -53,7 +53,14 @@ class FrontDoor(discord.ui.Modal):
         with sqlite3.connect(db_file) as conn:
             cursor = conn.cursor()
             cursor.execute('''
-            INSERT INTO applications (discordid, username, reason, inviter)
+            INSERT OR REPLACE INTO stats (discordid, username)
+            VALUES (?, ?)
+            ''', (
+                interaction.user.id,
+                self.username.value,
+            ))
+            cursor.execute('''
+            INSERT OR REPLACE INTO applications (discordid, username, reason, inviter)
             VALUES (?, ?, ?, ?)
             ''', (
                 interaction.user.id,
@@ -62,7 +69,6 @@ class FrontDoor(discord.ui.Modal):
                 self.inviter.value
             ))
             conn.commit()
-            applicant = interaction.user.id
 
         await interaction.response.send_message(
             f"Thank you for your application to the CAA.",
@@ -77,6 +83,7 @@ class FrontDoor(discord.ui.Modal):
         embed.add_field(name="Roblox Username", value=self.username.value, inline=True)
         embed.add_field(name="Reason for Entry", value=self.reason.value, inline=False)
         embed.add_field(name="Referrer", value=self.inviter.value or "N/A", inline=False)
+        embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 
         class ReviewMenu(discord.ui.View):
             def __init__(self,user,rbluser,bot):
@@ -91,6 +98,8 @@ class FrontDoor(discord.ui.Modal):
                 intern = discord.utils.get(interaction.guild.roles, name="Intern")
                 await self.user.add_roles(intern, reason = f'Promoted by <@{interaction.user.id}>')
                 await self.user.edit(nick=self.rbluser)
+
+
             @discord.ui.button(label='Deny', style=discord.ButtonStyle.red)
             async def on_denial(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
                 self.stop()
@@ -99,7 +108,6 @@ class FrontDoor(discord.ui.Modal):
 
         channel = self.bot.get_channel(REVIEW_CHANNEL)
         await channel.send(embed = embed, view = ReviewMenu(interaction.user,self.username.value,self.bot))
-
 
 class Register(commands.Cog):
     def __init__(self, bot):
