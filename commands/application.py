@@ -43,12 +43,12 @@ class Application(commands.Cog):
         username, reason, inviter = row
 
         embed = discord.Embed(
-            title="📄 Application Details",
-            description=f"Application submitted by {user.mention}",
-            color=discord.Color.green()
+            title="📄 Entry Request",
+            description=f"Submission by {user.mention}",
+            color=discord.Color.dark_gray()
         )
         embed.add_field(name="Roblox Username", value=username, inline=True)
-        embed.add_field(name="Reason for Entry", value=reason, inline=False)
+        embed.add_field(name="Stated Intent", value=reason, inline=False)
         embed.add_field(name="Referrer", value=inviter or "N/A", inline=False)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 

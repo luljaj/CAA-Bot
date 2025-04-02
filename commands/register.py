@@ -76,13 +76,14 @@ class FrontDoor(discord.ui.Modal):
         )
 
         embed = discord.Embed(
-                    title="🛎️ Front Door Application",
+                    title="🛎️ ENTRY REQUEST",
+                    description="CAA ARCHIVES - CONFIDENTIAL",
                     color=(5647104)
                 )
-        embed.add_field(name="Discord User", value=f"<@{interaction.user.id}>", inline=False)
-        embed.add_field(name="Roblox Username", value=self.username.value, inline=True)
-        embed.add_field(name="Reason for Entry", value=self.reason.value, inline=False)
-        embed.add_field(name="Referrer", value=self.inviter.value or "N/A", inline=False)
+        embed.add_field(name="DISCORD USER", value=f"<@{interaction.user.id}>", inline=False)
+        embed.add_field(name="ROBLOX USER", value=self.username.value, inline=True)
+        embed.add_field(name="STATED INTENT", value=self.reason.value, inline=False)
+        embed.add_field(name="REFERRER", value=self.inviter.value or "N/A", inline=False)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 
         class ReviewMenu(discord.ui.View):
