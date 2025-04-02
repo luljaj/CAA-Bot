@@ -4,6 +4,7 @@ import os
 import sqlite3
 import discord
 import requests
+import json
 
 # Environment and config
 db_folder = './databases'
@@ -20,7 +21,6 @@ class Stats(commands.Cog):
         name="stats",
         description="Retrieve a users stats."
     )
-    @app_commands.checks.has_permissions(manage_events=True) 
     @app_commands.guilds(Object(id=GUILD_ID)) 
     async def stats(self, interaction: Interaction, user: discord.User):
         with sqlite3.connect(db_file) as conn:
@@ -30,6 +30,9 @@ class Stats(commands.Cog):
                 (user.id,)
             )
             row = cursor.fetchone()
+            cursor.execute("SELECT awards FROM stats WHERE discordid = ?", (user.id,))
+            awards = json.loads(cursor.fetchone()[0])
+            print(awards)
 
         if not row:
             await interaction.response.send_message(
@@ -47,10 +50,11 @@ class Stats(commands.Cog):
             description=f"{user.mention}'s CAA Profile",
             color=discord.Color.dark_grey()
         )
-        embed.add_field(name="Roblox Username", value=username, inline=True)
+        embed.add_field(name="Roblox Username", value=username, inline=False)
         embed.add_field(name="Cash", value=cash, inline=False)
         embed.add_field(name="Reports", value=reports, inline=False)
         embed.add_field(name="Events Won", value=eventswon, inline=False)
+        embed.add_field(name = "Awards", value = "\n".join(awards), inline = False)
         embed.set_thumbnail(url=avatar_url)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS stats (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     discordid INT UNIQUE,
     username TEXT,
-    cash INT DEFAULT 0,
+    cash INT DEFAULT 50,
     reports INT DEFAULT 0,
     eventswon INT DEFAULT 0
 )
