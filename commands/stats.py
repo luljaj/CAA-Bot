@@ -42,19 +42,22 @@ class Stats(commands.Cog):
             return
 
         username, cash, reports, eventswon = row
-
         avatar_url = user.avatar.url
+        rank = user.top_role
 
         embed = discord.Embed(
-            title="📊 Profile",
-            description=f"{user.mention}'s CAA Profile",
-            color=discord.Color.dark_grey()
+            title=f"📂 {user.name} - EMPLOYEE RECORD",
+            color=rank.color
         )
-        embed.add_field(name="Roblox Username", value=username, inline=False)
-        embed.add_field(name="Cash", value=cash, inline=False)
-        embed.add_field(name="Reports", value=reports, inline=False)
-        embed.add_field(name="Events Won", value=eventswon, inline=False)
-        embed.add_field(name = "Awards", value = "\n".join(awards), inline = False)
+        inline = True
+        embed.add_field(name="ROLODEX ENTRY", value="", inline=False)
+        embed.add_field(name="ALIAS", value=username, inline=inline)
+        embed.add_field(name="POSITION", value=f'{rank.name}', inline=inline)
+        embed.add_field(name="BALANCE", value=f'${cash}', inline=inline)
+        embed.add_field(name="PERFORMANCE FILE", value="", inline=False)
+        embed.add_field(name="REPORTS", value=reports, inline=inline)
+        embed.add_field(name="EVENT WINS", value=eventswon, inline=inline)
+        embed.add_field(name = f'Awards ({len(awards)})', value = "\n".join(awards), inline = False)
         embed.set_thumbnail(url=avatar_url)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 

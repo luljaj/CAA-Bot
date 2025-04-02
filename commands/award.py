@@ -34,6 +34,8 @@ class Award(commands.Cog):
                     awards.remove(award[1:])
                 except:
                     None
+            if award == "clearawards":
+                awards.clear()
             else:
                 awards.append(award)
 
