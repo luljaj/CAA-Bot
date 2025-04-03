@@ -14,7 +14,6 @@ REVIEW_CHANNEL = 1356017239039414615
 
 
 def getUserId(user):
-    user = 'larnagack'
     try:
         link = requests.get(f'https://www.roblox.com/users/profile?username={user}')
     except:
@@ -57,7 +56,11 @@ class Stats(commands.Cog):
         user_id = getUserId(username)
         avatar_thumbnail = requests.get(f'https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={user_id}&size=420x420&format=Png')
         if avatar_thumbnail:
-            avatar_url = avatar_thumbnail.json()["data"][0]["imageUrl"]
+            try:
+                avatar_url = avatar_thumbnail.json()["data"][0]["imageUrl"]
+            except:
+                None
+            
         rank = user.top_role
 
         embed = discord.Embed(
