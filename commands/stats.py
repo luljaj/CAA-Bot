@@ -10,7 +10,6 @@ import json
 db_folder = './databases'
 db_file = os.path.join(db_folder, 'database.db')
 GUILD_ID = int(os.getenv("GUILDID"))
-REVIEW_CHANNEL = 1356017239039414615
 
 
 def getUserId(user):
@@ -36,7 +35,7 @@ class Stats(commands.Cog):
         with sqlite3.connect(db_file) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT username, cash, reports, eventswon FROM stats WHERE discordid = ?",
+                "SELECT id, username, cash, reports, eventswon FROM stats WHERE discordid = ?",
                 (user.id,)
             )
             row = cursor.fetchone()
@@ -51,7 +50,7 @@ class Stats(commands.Cog):
             )
             return
 
-        username, cash, reports, eventswon = row
+        id, username, cash, reports, eventswon = row
         avatar_url = user.avatar.url
         user_id = getUserId(username)
         avatar_thumbnail = requests.get(f'https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={user_id}&size=420x420&format=Png')
@@ -70,7 +69,7 @@ class Stats(commands.Cog):
 
         
         inline = True
-        embed.add_field(name="ROLODEX ENTRY", value="", inline=False)
+        embed.add_field(name=f"ROLODEX ENTRY #{id}", value="", inline=False)
         embed.add_field(name="ALIAS", value=username, inline=inline)
         embed.add_field(name="POSITION", value=f'{rank.name}', inline=inline)
         embed.add_field(name="BALANCE", value=f'${cash}', inline=inline)

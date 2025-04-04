@@ -10,7 +10,6 @@ import json
 db_folder = './databases'
 db_file = os.path.join(db_folder, 'database.db')
 GUILD_ID = int(os.getenv("GUILDID"))
-REVIEW_CHANNEL = 1356017239039414615
 
 
 class Award(commands.Cog):
@@ -32,6 +31,7 @@ class Award(commands.Cog):
             if award[0] == "-":
                 try:
                     awards.remove(award[1:])
+                    return
                 except:
                     None
             if award == "clearawards":
