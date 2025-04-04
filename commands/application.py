@@ -8,7 +8,7 @@ import discord
 db_folder = './databases'
 db_file = os.path.join(db_folder, 'database.db')
 GUILD_ID = int(os.getenv("GUILDID"))
-REVIEW_CHANNEL = 1356017239039414615
+
 
 
 class Application(commands.Cog):
