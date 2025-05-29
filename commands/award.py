@@ -29,14 +29,16 @@ class Award(commands.Cog):
             row = cursor.fetchone()
             awards = json.loads(row[0]) if row and row[0] else []
             if award[0] == "-":
+                proc = 0
                 try:
-                    awards.remove(award[1:])
-                    return
+                    awards.remove(award[1:]) 
                 except:
                     None
-            if award == "clearawards":
+            elif award == "clearawards":
+                proc = 1
                 awards.clear()
             else:
+                proc = 2
                 awards.append(award)
 
             cursor.execute("UPDATE stats SET awards = ? WHERE discordid = ?", (json.dumps(awards), user.id))
@@ -48,7 +50,13 @@ class Award(commands.Cog):
             )
             return
 
-        await interaction.response.send_message(f'{user.mention} awarded with \'{award}\'.')
+        if proc == 0:
+            await interaction.response.send_message(f'Award \'{award[1:]}\' removed from {user.mention}.')
+        elif proc == 1:
+            await interaction.response.send_message(f'{user.mention} awards have been cleared.')
+        elif proc == 2:
+            await interaction.response.send_message(f'{user.mention} awarded with \'{award}\'.')
+
 
 
 
