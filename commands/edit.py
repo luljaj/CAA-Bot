@@ -22,14 +22,12 @@ class Edit(commands.Cog):
     @app_commands.checks.has_permissions(manage_events=True) 
     @app_commands.guilds(Object(id=GUILD_ID)) 
     @app_commands.choices(slot = [app_commands.Choice(name = 'Username', value = 'username'),
-            app_commands.Choice(name = 'Cash', value = 'cash'),
-            app_commands.Choice(name = 'Reports', value = 'reports'),
             app_commands.Choice(name = 'Events Won', value = 'eventswon')])
 
 
     async def edit(self, interaction: Interaction, user: discord.User, slot: app_commands.Choice[str], val: str):
         value = None
-        if slot.value in ['cash', 'reports', 'eventswon']:
+        if slot.value in ['eventswon']:
             try:
                 value = int(val)
             except:
