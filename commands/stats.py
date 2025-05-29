@@ -68,16 +68,12 @@ class Stats(commands.Cog):
 
         roles.reverse()
 
-        print(roles)
-
         normal = 'Event Winner', 'Server Booster'
 
         for i in roles:
             if i.name in normal:
-                print(f'name is {i.name}')
                 continue
             else:
-                print(i.name)
                 rank = i
                 break
 
