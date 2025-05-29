@@ -51,11 +51,11 @@ class Award(commands.Cog):
             return
 
         if proc == 0:
-            await interaction.response.send_message(f'Award \'{award[1:]}\' removed from {user.mention}.')
+            await interaction.response.send_message(f'Award \'{award[1:]}\' removed from {user.mention}.', ephemeral= True)
         elif proc == 1:
-            await interaction.response.send_message(f'{user.mention} awards have been cleared.')
+            await interaction.response.send_message(f'{user.mention} awards have been cleared.', ephemeral= True)
         elif proc == 2:
-            await interaction.response.send_message(f'{user.mention} awarded with \'{award}\'.')
+            await interaction.response.send_message(f'{user.mention} awarded with \'{award}\'.', ephemeral= True)
 
 
 
