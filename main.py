@@ -2,10 +2,19 @@ import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
+from supabase import Client, create_client
+
+
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 GUILD_ID = int(os.getenv("GUILDID"))
+SUPAKEY = os.getenv('SUPABASE_KEY')
+SUPAURL = os.getenv('SUPABASE_DB_URL')
+
+print(SUPAURL)
+
+supabase: Client = create_client(SUPAURL,SUPAKEY)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -15,6 +24,8 @@ bot = commands.Bot(command_prefix="1241243235234234234234",intents=intents)
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
+
+bot.supabase = supabase
 
 @bot.event
 async def setup_hook():
