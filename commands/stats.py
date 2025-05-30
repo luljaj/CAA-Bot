@@ -27,8 +27,9 @@ def getUserId(user):
     return id
 
 class Stats(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, supabase):
         self.bot = bot
+        self.supabase = supabase
 
     @app_commands.command(
         name="stats",

@@ -12,8 +12,9 @@ GUILD_ID = int(os.getenv("GUILDID"))
 
 
 class Application(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, supabase):
         self.bot = bot
+        self.supabase = supabase
 
     @app_commands.command(
         name="application",
