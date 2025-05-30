@@ -9,10 +9,8 @@ from supabase import Client, create_client
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 GUILD_ID = int(os.getenv("GUILDID"))
-SUPAKEY = os.getenv('SUPABASE_KEY')
-SUPAURL = os.getenv('SUPABASE_DB_URL')
-
-print(SUPAURL)
+SUPAURL = str(os.getenv('SUPABASE_DB_URL'))
+SUPAKEY = str(os.getenv('SUPABASE_KEY'))
 
 supabase: Client = create_client(SUPAURL,SUPAKEY)
 
@@ -25,13 +23,11 @@ bot = commands.Bot(command_prefix="1241243235234234234234",intents=intents)
 async def on_ready():
     print(f"Logged in as {bot.user}")
 
-bot.supabase = supabase
-
 @bot.event
 async def setup_hook():
     for filename in os.listdir("./commands"):
         if filename.endswith(".py"):
-            await bot.load_extension(f"commands.{filename[:-3]}")
+            await bot.load_extension(f"commands.{filename[:-3]}", supabase = supabase)
 
     guild = discord.Object(id=GUILD_ID)
     await bot.tree.sync(guild=guild)

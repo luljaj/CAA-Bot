@@ -13,8 +13,9 @@ GUILD_ID = int(os.getenv("GUILDID"))
 
 
 class Edit(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, supabase):
         self.bot = bot
+        self.supabase = supabase
     @app_commands.command(
         name="edit",
         description="Edit an employee's file."

@@ -13,10 +13,11 @@ FRONTDOOR_ID = 1355935366867062826
 
 
 class FrontDoor(discord.ui.Modal):
-    def __init__(self, bot):
+    def __init__(self, bot, supabase):
         super().__init__(title="Front Door", timeout=None)
         self.bot = bot
-
+        self.supabase = supabase
+        
         username = discord.ui.TextInput(
             label='Roblox Username',
             placeholder='Enter your Roblox name',
