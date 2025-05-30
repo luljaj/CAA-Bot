@@ -6,6 +6,7 @@ import discord
 import requests
 import json
 from collections import defaultdict
+from dotenv import load_dotenv
 
 #postgresql://postgres:[YOUR-PASSWORD]@db.wgubmkcpklfizfshjwak.supabase.co:5432/postgres
 

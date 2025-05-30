@@ -43,12 +43,5 @@ class Edit(commands.Cog):
 
         await interaction.response.send_message(f'{user.mention}\'s {slot.value} has been changed to {value}.', ephemeral=True)
 
-
-
-
-
-
-
-
 async def setup(bot):
     await bot.add_cog(Edit(bot))
