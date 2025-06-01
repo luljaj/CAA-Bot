@@ -4,8 +4,6 @@ import os
 import sqlite3
 import discord
 
-db_folder = './databases'
-db_file = os.path.join(db_folder, 'database.db')
 GUILD_ID = int(os.getenv("GUILDID"))
 REVIEW_CHANNEL = 1356017239039414615
 INTERN_ID = 1356349048516382781
@@ -13,10 +11,10 @@ FRONTDOOR_ID = 1355935366867062826
 
 
 class FrontDoor(discord.ui.Modal):
-    def __init__(self, bot, supabase):
+    def __init__(self, bot):
         super().__init__(title="Front Door", timeout=None)
         self.bot = bot
-        self.supabase = supabase
+        self.supabase = bot.supabase
         
         username = discord.ui.TextInput(
             label='Roblox Username',
@@ -51,25 +49,11 @@ class FrontDoor(discord.ui.Modal):
         inviter = inviter
 
     async def on_submit(self, interaction: Interaction):
-        with sqlite3.connect(db_file) as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-            INSERT OR REPLACE INTO stats (discordid, username)
-            VALUES (?, ?)
-            ''', (
-                interaction.user.id,
-                self.username.value,
-            ))
-            cursor.execute('''
-            INSERT OR REPLACE INTO applications (discordid, username, reason, inviter)
-            VALUES (?, ?, ?, ?)
-            ''', (
-                interaction.user.id,
-                self.username.value,
-                self.reason.value,
-                self.inviter.value
-            ))
-            conn.commit()
+
+        response =  (
+        self.supabase.rpc("register", params = {"uid":self.user.id, "u" :self.username.value, "r":self.reason.value, "inv":self.inviter.value})
+        .execute()
+            )
 
         await interaction.response.send_message(
             f"Thank you for your application to the CAA.",

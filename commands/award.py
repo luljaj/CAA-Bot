@@ -6,16 +6,13 @@ import discord
 import requests
 import json
 
-# Environment and config
-db_folder = './databases'
-db_file = os.path.join(db_folder, 'database.db')
 GUILD_ID = int(os.getenv("GUILDID"))
 
 
 class Award(commands.Cog):
-    def __init__(self, bot, supabase):
+    def __init__(self, bot):
         self.bot = bot
-        self.supabase = supabase
+        self.supabase = bot.supabase
 
     @app_commands.command(
         name="award",
@@ -24,32 +21,26 @@ class Award(commands.Cog):
     @app_commands.checks.has_permissions(manage_events=True) 
     @app_commands.guilds(Object(id=GUILD_ID)) 
     async def award(self, interaction: Interaction, user: discord.User, award: str):
-        with sqlite3.connect(db_file) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT awards FROM stats WHERE discordid = ?", (user.id,))
-            row = cursor.fetchone()
-            awards = json.loads(row[0]) if row and row[0] else []
-            if award[0] == "-":
-                proc = 0
-                try:
-                    awards.remove(award[1:]) 
-                except:
-                    None
-            elif award == "clearawards":
-                proc = 1
-                awards.clear()
-            else:
-                proc = 2
-                awards.append(award)
-
-            cursor.execute("UPDATE stats SET awards = ? WHERE discordid = ?", (json.dumps(awards), user.id))
-
-        if not row:
-            await interaction.response.send_message(
-                f"No stats found for {user.mention}.",
-                ephemeral=True
+        self.user = user
+        if award[0] == "-":
+            proc = 0 
+            response = (
+                self.supabase.rpc("removeaward", params = {"uid": self.user.id, "award": award})
+                .execute()
             )
-            return
+        elif award == "clearawards":
+            proc = 1
+            response = (
+                self.supabase.rpc("clearawards", params = {"uid": self.user.id})
+                .execute()
+            )
+        else:
+            proc = 2
+            response = (
+                self.supabase.rpc("addaward", params = {"uid": self.user.id, "award": award})
+                .execute()
+            )
+
 
         if proc == 0:
             await interaction.response.send_message(f'Award \'{award[1:]}\' removed from {user.mention}.', ephemeral= True)
@@ -57,14 +48,6 @@ class Award(commands.Cog):
             await interaction.response.send_message(f'{user.mention} awards have been cleared.', ephemeral= True)
         elif proc == 2:
             await interaction.response.send_message(f'{user.mention} awarded with \'{award}\'.', ephemeral= True)
-
-
-
-
-
-
-
-
 
 async def setup(bot):
     await bot.add_cog(Award(bot))
