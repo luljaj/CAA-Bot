@@ -51,7 +51,7 @@ class FrontDoor(discord.ui.Modal):
     async def on_submit(self, interaction: Interaction):
 
         response =  (
-        self.supabase.rpc("register", params = {"uid":self.user.id, "u" :self.username.value, "r":self.reason.value, "inv":self.inviter.value})
+        self.supabase.rpc("register", params = {"uid":interaction.user.id, "u" :self.username.value, "r":self.reason.value, "inv":self.inviter.value})
         .execute()
             )
 
