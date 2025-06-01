@@ -16,6 +16,7 @@ supabase: Client = create_client(SUPAURL,SUPAKEY)
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 
 bot = commands.Bot(command_prefix="1241243235234234234234",intents=intents)
 
