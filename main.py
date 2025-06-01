@@ -31,6 +31,8 @@ async def setup_hook():
         if filename.endswith(".py"):
             await bot.load_extension(f"commands.{filename[:-3]}")
 
+    await bot.load_extension("cogs.frontdoorcleaner")
+
     guild = discord.Object(id=GUILD_ID)
     await bot.tree.sync(guild=guild)
 

@@ -18,11 +18,17 @@ class Setalias(commands.Cog):
         description="Change an employee's alias on file."
     )
     @app_commands.checks.has_permissions(manage_events=True) 
+    @app_commands.default_permissions(manage_events=True) 
     @app_commands.guilds(Object(id=GUILD_ID)) 
 
 
     async def setalias(self, interaction: Interaction, user: discord.User, robloxuser: str):
         self.user = user
+        self.robloxuser = robloxuser
+
+        if len(robloxuser) > 50 or not robloxuser.isalnum():
+            await interaction.response.send_message(f'Invalid alias.', ephemeral=True)
+            return None
         response = (
                 self.supabase.rpc("setalias", params = {"uid": self.user.id, "u" : robloxuser})
                 .execute()
@@ -30,7 +36,9 @@ class Setalias(commands.Cog):
         
         print(response)
 
-        await interaction.response.send_message(f'{user.mention}\'s alias has been updated to {robloxuser}.', ephemeral=True)
+        await self.user.edit(nick=self.robloxuser)
+
+        await interaction.response.send_message(f'{user.mention}\'s alias has been updated to {self.robloxuser}.', ephemeral=True)
 
 
 async def setup(bot):

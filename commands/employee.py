@@ -18,6 +18,7 @@ class Employee(commands.Cog):
         description="Upgrade an intern to employee."
     )
     @app_commands.checks.has_permissions(manage_events=True) 
+    @app_commands.default_permissions(manage_events=True)  
     @app_commands.guilds(Object(id=GUILD_ID)) 
 
 
