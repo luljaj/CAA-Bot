@@ -18,17 +18,21 @@ class Editevents(commands.Cog):
         description="Change an employee's event win count."
     )
     @app_commands.checks.has_permissions(manage_events=True) 
+    @app_commands.default_permissions(manage_events=True)  
     @app_commands.guilds(Object(id=GUILD_ID)) 
 
 
     async def editevents(self, interaction: Interaction, user: discord.User, wincount: int):
         self.user = user
+        if 0 > wincount > 999:
+            await interaction.response.send_message(f'Win count invalid.', ephemeral=True)
+            return None
         response =  (
             self.supabase.rpc("editevent", params = {"edit_val":wincount,"uid":self.user.id})
             .execute()
             )
         
-        await interaction.response.send_message(f'{user.mention}\'s event win count is now {int}.', ephemeral=True)
+        await interaction.response.send_message(f'{user.mention}\'s event win count is now {wincount}.', ephemeral=True)
 
 
 async def setup(bot):

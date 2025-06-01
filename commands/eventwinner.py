@@ -18,6 +18,7 @@ class Eventwinner(commands.Cog):
         description="Give an employee their win credentials."
     )
     @app_commands.checks.has_permissions(manage_events=True) 
+    @app_commands.default_permissions(manage_events=True) 
     @app_commands.guilds(Object(id=GUILD_ID)) 
 
 

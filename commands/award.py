@@ -18,10 +18,14 @@ class Award(commands.Cog):
         name="award",
         description="Give a user an award."
     )
-    @app_commands.checks.has_permissions(manage_events=True) 
+    @app_commands.checks.has_permissions(manage_events=True)
+    @app_commands.default_permissions(manage_events=True)  
     @app_commands.guilds(Object(id=GUILD_ID)) 
     async def award(self, interaction: Interaction, user: discord.User, award: str):
         self.user = user
+        if len(award) > 50 or not award.isalnum():
+            await interaction.response.send_message(f'Award name is too long.', ephemeral= True)
+            return
         if award[0] == "-":
             proc = 0 
             response = (

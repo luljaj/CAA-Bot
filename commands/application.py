@@ -21,6 +21,7 @@ class Application(commands.Cog):
         description="Retrieve front door application for a specific user."
     )
     @app_commands.checks.has_permissions(manage_events=True)  
+    @app_commands.default_permissions(manage_events=True) 
     @app_commands.guilds(Object(id=GUILD_ID))  
     async def application(self, interaction: Interaction, user: discord.User):
 
@@ -31,14 +32,14 @@ class Application(commands.Cog):
                 .execute()
             )
 
-        if not response:
+        if not response.data.values():
             await interaction.response.send_message(
                 f"No application found for {user.mention}.",
                 ephemeral=True
             )
             return
 
-        id, discordid, username, reason, inviter, date = response.data.values()
+        id, discordid, username, reason, inviter, raw_date = response.data.values()
 
         embed = discord.Embed(
             title="📄 Entry Request",
@@ -46,8 +47,13 @@ class Application(commands.Cog):
             color=discord.Color.dark_gray()
         )
 
-        dt = datetime.fromisoformat(date)
-        formatted = dt.strftime("%Y-%m-%d %H:%M")  # You can customize this format
+        if '.' in raw_date:
+            date_part, micro = raw_date.split('.')
+            micro = (micro + '000000')[:6]
+            raw_date = f"{date_part}.{micro}"
+
+        dt = datetime.fromisoformat(raw_date)
+        formatted = dt.strftime("%Y-%m-%d %H:%M") 
 
         embed.add_field(name="Roblox Username", value=username, inline=True)
         embed.add_field(name="Stated Intent", value=reason, inline=False)

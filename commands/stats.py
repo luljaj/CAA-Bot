@@ -36,7 +36,7 @@ class Stats(commands.Cog):
                     self.supabase.rpc("fetchstats", params = {"uid": user.id})
                     .execute())
 
-        if not response:
+        if not response.data.values():
             await interaction.response.send_message(
                 f"No stats found for {user.mention}.",
                 ephemeral=True
@@ -46,13 +46,12 @@ class Stats(commands.Cog):
         id, discordid, username, eventswon, awards = response.data.values()
 
         avatar_url = user.avatar.url
-        user_id = getUserId(username)
-        avatar_thumbnail = requests.get(f'https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={user_id}&size=420x420&format=Png')
-        if avatar_thumbnail:
-            try:
-                avatar_url = avatar_thumbnail.json()["data"][0]["imageUrl"]
-            except:
-                None
+        try:
+            user_id = getUserId(username)
+            avatar_thumbnail = requests.get(f'https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={user_id}&size=420x420&format=Png')
+            avatar_url = avatar_thumbnail.json()["data"][0]["imageUrl"]
+        except:
+            None
         
         rank = user.top_role
 
