@@ -24,7 +24,7 @@ class Employee(commands.Cog):
     async def employee(self, interaction: Interaction, user: discord.User):
         self.user = user
 
-        employee = discord.utils.get(interaction.guild.roles, name="Event Winner")
+        employee = discord.utils.get(interaction.guild.roles, name="Employee")
         await self.user.add_roles(employee, reason = f'Employee promoted by <@{interaction.user.id}>')
 
 
