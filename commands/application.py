@@ -3,18 +3,16 @@ from discord import app_commands, Interaction, Object
 import os
 import sqlite3
 import discord
+import supabase
 
-# Environment and config
-db_folder = './databases'
-db_file = os.path.join(db_folder, 'database.db')
 GUILD_ID = int(os.getenv("GUILDID"))
 
 
 
 class Application(commands.Cog):
-    def __init__(self, bot, supabase):
+    def __init__(self, bot):
         self.bot = bot
-        self.supabase = supabase
+        self.supabase = bot.supabase
 
     @app_commands.command(
         name="application",
@@ -23,25 +21,22 @@ class Application(commands.Cog):
     @app_commands.checks.has_permissions(manage_events=True)  
     @app_commands.guilds(Object(id=GUILD_ID))  
     async def application(self, interaction: Interaction, user: discord.User):
+
+        self.user = user
         
-        with sqlite3.connect(db_file) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT username, reason, inviter FROM applications WHERE discordid = ?",
-                (user.id,)
+        response = (
+                self.supabase.rpc("fetchapplication", params = {"uid": self.user.id})
+                .execute()
             )
-            row = cursor.fetchone()
 
-        print(user.id)
-
-        if not row:
+        if not response:
             await interaction.response.send_message(
                 f"No application found for {user.mention}.",
                 ephemeral=True
             )
             return
 
-        username, reason, inviter = row
+        id, discordid, username, reason, inviter, date = response.data.values()
 
         embed = discord.Embed(
             title="📄 Entry Request",
@@ -51,6 +46,7 @@ class Application(commands.Cog):
         embed.add_field(name="Roblox Username", value=username, inline=True)
         embed.add_field(name="Stated Intent", value=reason, inline=False)
         embed.add_field(name="Referrer", value=inviter or "N/A", inline=False)
+        embed.add_field(name="Submission Date", value=date or "N/A", inline=False)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 
         await interaction.response.send_message(embed=embed)

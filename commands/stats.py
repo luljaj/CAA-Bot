@@ -8,11 +8,6 @@ import json
 from collections import defaultdict
 from dotenv import load_dotenv
 
-#postgresql://postgres:[YOUR-PASSWORD]@db.wgubmkcpklfizfshjwak.supabase.co:5432/postgres
-
-# Environment and config
-db_folder = './databases'
-db_file = os.path.join(db_folder, 'database.db')
 GUILD_ID = int(os.getenv("GUILDID"))
 
 
@@ -27,9 +22,9 @@ def getUserId(user):
     return id
 
 class Stats(commands.Cog):
-    def __init__(self, bot, supabase):
+    def __init__(self, bot):
         self.bot = bot
-        self.supabase = supabase
+        self.supabase = bot.supabase
 
     @app_commands.command(
         name="stats",
@@ -37,24 +32,19 @@ class Stats(commands.Cog):
     )
     @app_commands.guilds(Object(id=GUILD_ID)) 
     async def stats(self, interaction: Interaction, user: discord.User):
-        with sqlite3.connect(db_file) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT id, username, eventswon FROM stats WHERE discordid = ?",
-                (user.id,)
-            )
-            row = cursor.fetchone()
-            cursor.execute("SELECT awards FROM stats WHERE discordid = ?", (user.id,))
-            awards = json.loads(cursor.fetchone()[0])
+        response = (
+                    self.supabase.rpc("fetchstats", params = {"uid": user.id})
+                    .execute())
 
-        if not row:
+        if not response:
             await interaction.response.send_message(
                 f"No stats found for {user.mention}.",
                 ephemeral=True
             )
             return
 
-        id, username, eventswon = row
+        id, discordid, username, eventswon, awards = response.data.values()
+
         avatar_url = user.avatar.url
         user_id = getUserId(username)
         avatar_thumbnail = requests.get(f'https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={user_id}&size=420x420&format=Png')
@@ -105,12 +95,6 @@ class Stats(commands.Cog):
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 
         await interaction.response.send_message(embed=embed)
-
-
-
-
-
-
 
 
 async def setup(bot):

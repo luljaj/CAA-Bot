@@ -19,6 +19,8 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="1241243235234234234234",intents=intents)
 
+bot.supabase = supabase
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
@@ -27,7 +29,7 @@ async def on_ready():
 async def setup_hook():
     for filename in os.listdir("./commands"):
         if filename.endswith(".py"):
-            await bot.load_extension(f"commands.{filename[:-3]}", supabase = supabase)
+            await bot.load_extension(f"commands.{filename[:-3]}")
 
     guild = discord.Object(id=GUILD_ID)
     await bot.tree.sync(guild=guild)
