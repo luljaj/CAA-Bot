@@ -3,6 +3,8 @@ from discord import app_commands, Interaction, Object
 import os
 import sqlite3
 import discord
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 GUILD_ID = int(os.getenv("GUILDID"))
 REVIEW_CHANNEL = 1356017239039414615
@@ -60,15 +62,20 @@ class FrontDoor(discord.ui.Modal):
             ephemeral=True
         )
 
+        now = datetime.now(ZoneInfo("America/New_York"))
+        formatted = now.strftime("%Y-%m-%d %H:%M")
+
+        formatted = now.strftime("%Y-%m-%d %H:%M")  # Date then hour:minute
+
         embed = discord.Embed(
-                    title="🛎️ ENTRY REQUEST",
-                    description="CAA ARCHIVES - CONFIDENTIAL",
+                    title="🛎️ Entry Request",
+                    description=f"Submission at {formatted}",
                     color=(5647104)
                 )
-        embed.add_field(name="DISCORD USER", value=f"<@{interaction.user.id}>", inline=False)
-        embed.add_field(name="ROBLOX USER", value=self.username.value, inline=True)
-        embed.add_field(name="STATED INTENT", value=self.reason.value, inline=False)
-        embed.add_field(name="REFERRER", value=self.inviter.value or "N/A", inline=False)
+        embed.add_field(name="Discord User", value=f"<@{interaction.user.id}>", inline=False)
+        embed.add_field(name="Roblox User", value=self.username.value, inline=True)
+        embed.add_field(name="Stated Intent", value=self.reason.value, inline=False)
+        embed.add_field(name="Referrer", value=self.inviter.value or "N/A", inline=False)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 
         class ReviewMenu(discord.ui.View):

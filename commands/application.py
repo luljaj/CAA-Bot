@@ -4,6 +4,8 @@ import os
 import sqlite3
 import discord
 import supabase
+from datetime import datetime
+
 
 GUILD_ID = int(os.getenv("GUILDID"))
 
@@ -43,10 +45,14 @@ class Application(commands.Cog):
             description=f"Submission by {user.mention}",
             color=discord.Color.dark_gray()
         )
+
+        dt = datetime.fromisoformat(date)
+        formatted = dt.strftime("%Y-%m-%d %H:%M")  # You can customize this format
+
         embed.add_field(name="Roblox Username", value=username, inline=True)
         embed.add_field(name="Stated Intent", value=reason, inline=False)
         embed.add_field(name="Referrer", value=inviter or "N/A", inline=False)
-        embed.add_field(name="Submission Date", value=date or "N/A", inline=False)
+        embed.add_field(name="Submission Date", value=formatted or "N/A", inline=False)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 
         await interaction.response.send_message(embed=embed)
