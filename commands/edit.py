@@ -24,9 +24,9 @@ class Editevents(commands.Cog):
 
     async def editevents(self, interaction: Interaction, user: discord.User, wincount: int):
         self.user = user
-        if 0 > wincount > 999:
+        if not 0 <= wincount <= 999:
             await interaction.response.send_message(f'Win count invalid.', ephemeral=True)
-            return None
+            return
         response =  (
             self.supabase.rpc("editevent", params = {"edit_val":wincount,"uid":self.user.id})
             .execute()
