@@ -86,6 +86,11 @@ class FrontDoor(discord.ui.Modal):
                 self.rbluser = rbluser
             @discord.ui.button(label='Approve', style=discord.ButtonStyle.green)
             async def on_approval(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+                if not interaction.user.guild_permissions.manage_roles:
+                    await interaction.response.send_message(
+                        "Only Vice Secretary and above can approve or reject members.", ephemeral=True
+                    )
+                    return
                 self.stop()
                 await interaction.response.send_message(content=f'<@{self.user.id}> ({self.rbluser}) has been promoted to Intern.')
                 intern = discord.utils.get(interaction.guild.roles, name="Intern")
@@ -95,6 +100,11 @@ class FrontDoor(discord.ui.Modal):
 
             @discord.ui.button(label='Deny', style=discord.ButtonStyle.red)
             async def on_denial(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+                if not interaction.user.guild_permissions.manage_roles:
+                    await interaction.response.send_message(
+                        "Only Vice Secretary and above can approve or reject members.", ephemeral=True
+                    )
+                    return
                 self.stop()
                 await interaction.response.send_message(content=f'<@{self.user.id}> has been denied.')
 
