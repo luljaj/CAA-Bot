@@ -25,7 +25,7 @@ class Employee(commands.Cog):
         self.user = user
 
         employee = discord.utils.get(interaction.guild.roles, name="Employee")
-        await self.user.add_roles(employee, reason = f'Employee promoted by <@{interaction.user.id}>')
+        await self.user.add_roles(employee, reason = f'Employee promoted by <@{interaction.user.name}>')
 
 
         await interaction.response.send_message(f'{user.mention}\'s has been promoted to Employee.', ephemeral=True)
