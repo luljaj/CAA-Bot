@@ -18,7 +18,6 @@ class Award(commands.Cog):
         name="award",
         description="Give a user an award."
     )
-    @app_commands.checks.has_permissions(manage_events=True)
     @app_commands.default_permissions(manage_events=True)  
     @app_commands.guilds(Object(id=GUILD_ID)) 
     async def award(self, interaction: Interaction, user: discord.User, award: str):

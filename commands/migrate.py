@@ -24,7 +24,6 @@ class Migrate(commands.Cog):
         name="migrate",
         description="Migrates the entire server over. Do not use."
     )
-    @app_commands.checks.has_permissions(manage_events=True) 
     @larnagack()
     @app_commands.default_permissions(manage_events=True)  
     @app_commands.guilds(Object(id=GUILD_ID)) 

@@ -19,8 +19,7 @@ class Application(commands.Cog):
     @app_commands.command(
         name="application",
         description="Retrieve front door application for a specific user."
-    )
-    @app_commands.checks.has_permissions(manage_events=True)  
+    ) 
     @app_commands.default_permissions(manage_events=True) 
     @app_commands.guilds(Object(id=GUILD_ID))  
     async def application(self, interaction: Interaction, user: discord.User):
