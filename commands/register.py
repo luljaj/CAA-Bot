@@ -8,8 +8,8 @@ from zoneinfo import ZoneInfo
 
 GUILD_ID = int(os.getenv("GUILDID"))
 REVIEW_CHANNEL = 1356017239039414615
-INTERN_ID = 1356349048516382781
-FRONTDOOR_ID = 1355935366867062826
+INTERN_ID = 992605675949666315
+FRONTDOOR_ID = 986110301722251334
 
 
 class FrontDoor(discord.ui.Modal):
@@ -96,7 +96,7 @@ class FrontDoor(discord.ui.Modal):
             @discord.ui.button(label='Deny', style=discord.ButtonStyle.red)
             async def on_denial(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
                 self.stop()
-                await interaction.response.send_message(content=f'<@{self.user.id}> has been denied and kicked.')
+                await interaction.response.send_message(content=f'<@{self.user.id}> has been denied.')
 
 
         channel = self.bot.get_channel(REVIEW_CHANNEL)
