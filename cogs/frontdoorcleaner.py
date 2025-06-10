@@ -3,8 +3,8 @@ from discord import Interaction
 import os
 import discord
 
-CHANNEL_ID = 1355935366867062826
-ALLOWED_USERS = [1355933950018584876]
+CHANNEL_ID = 986110301722251334
+ALLOWED_USERS = [1355933950018584876,660245181412409349,850869448356528148]
 
 class FrontDoorCleaner(commands.Cog):
     def __init__(self, bot: commands.Bot):
