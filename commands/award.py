@@ -22,7 +22,7 @@ class Award(commands.Cog):
     @app_commands.guilds(Object(id=GUILD_ID)) 
     async def award(self, interaction: Interaction, user: discord.User, award: str):
         self.user = user
-        if len(award) > 50 or not award.isalnum():
+        if len(award) > 50:
             await interaction.response.send_message(f'Award name is too long.', ephemeral= True)
             return
         if award[0] == "-":
