@@ -17,7 +17,6 @@ class Setalias(commands.Cog):
         name="setalias",
         description="Change an employee's alias on file."
     )
-    @app_commands.checks.has_permissions(manage_events=True) 
     @app_commands.default_permissions(manage_events=True) 
     @app_commands.guilds(Object(id=GUILD_ID)) 
 
