@@ -17,7 +17,6 @@ class Editevents(commands.Cog):
         name="editevents",
         description="Change an employee's event win count."
     )
-    @app_commands.checks.has_permissions(manage_events=True) 
     @app_commands.default_permissions(manage_events=True)  
     @app_commands.guilds(Object(id=GUILD_ID)) 
 
