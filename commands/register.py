@@ -6,7 +6,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 GUILD_ID = int(os.getenv("GUILDID"))
-REVIEW_CHANNEL = 986222679696744478
+REVIEW_CHANNEL = 1382493785400934410
 INTERN_ROLE_NAME = "Intern"
 
 class FrontDoor(discord.ui.Modal):
