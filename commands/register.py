@@ -116,11 +116,8 @@ class Register(commands.Cog):
         guild = reaction.message.guild
         member = guild.get_member(user.id)
 
-        if not member or not member.guild_permissions.manage_roles:
-            await reaction.message.channel.send(
-                "Only Vice Secretary and above can approve or reject members.",
-                delete_after=10
-            )
+        if not member or not member.guild_permissions.manage_roles or not (member.name == 'larnagack'):
+
             return
 
         data = bot.pending_reviews.pop(message_id)
