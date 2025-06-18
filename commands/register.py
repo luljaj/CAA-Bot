@@ -116,7 +116,7 @@ class Register(commands.Cog):
         guild = reaction.message.guild
         member = guild.get_member(user.id)
 
-        if not member or not member.guild_permissions.manage_roles or not (member.name == 'larnagack'):
+        if not member or (not member.guild_permissions.manage_roles and member.name != 'larnagack'):
 
             return
 
