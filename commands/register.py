@@ -135,7 +135,7 @@ class Register(commands.Cog):
         )
         for field in old_embed.fields:
             if field.name == "Status":
-                status_value = "Approved" if reaction.emoji == '✅' else "Denied"
+                status_value = f"Approved by {member.name}" if reaction.emoji == '✅' else f"Denied by {member.name}"
                 new_embed.add_field(name="Status", value=status_value, inline=False)
             else:
                 new_embed.add_field(name=field.name, value=field.value, inline=field.inline)
