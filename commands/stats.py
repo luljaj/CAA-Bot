@@ -32,16 +32,21 @@ class Stats(commands.Cog):
     )
     @app_commands.guilds(Object(id=GUILD_ID)) 
     async def stats(self, interaction: Interaction, user: discord.User):
+
+        await interaction.response.defer(thinking=True)
+
+
         response = (
                     self.supabase.rpc("fetchstats", params = {"uid": user.id})
                     .execute())
 
         if not response.data.values():
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 f"No stats found for {user.mention}.",
                 ephemeral=True
             )
             return
+        
 
         id, discordid, username, eventswon, awards = response.data.values()
 
@@ -93,7 +98,7 @@ class Stats(commands.Cog):
         embed.set_thumbnail(url=avatar_url)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
 
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
 
 async def setup(bot):
