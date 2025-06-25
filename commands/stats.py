@@ -40,7 +40,7 @@ class Stats(commands.Cog):
                     self.supabase.rpc("fetchstats", params = {"uid": user.id})
                     .execute())
 
-        if not response.data.values():
+        if not response.data():
             await interaction.followup.send(
                 f"No stats found for {user.mention}.",
                 ephemeral=True
