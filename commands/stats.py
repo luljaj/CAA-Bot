@@ -1,25 +1,26 @@
 from discord.ext import commands
 from discord import app_commands, Interaction, Object
 import os
-import sqlite3
 import discord
-import requests
-import json
 from collections import defaultdict
-from dotenv import load_dotenv
+import aiohttp
 
 GUILD_ID = int(os.getenv("GUILDID"))
 
 
-def getUserId(user):
+async def getUserId(user):
+    url = f'https://www.roblox.com/users/profile?username={user}'
     try:
-        link = requests.get(f'https://www.roblox.com/users/profile?username={user}')
-    except:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, allow_redirects=True) as resp:
+                final_url = str(resp.url)
+    except Exception:
         return None
-    url =  link.url
-    lurl = url.split('/')
-    id = lurl[4]
-    return id
+
+    lurl = final_url.split('/')
+    if len(lurl) > 4:
+        return lurl[4]
+    return None
 
 class Stats(commands.Cog):
     def __init__(self, bot):
@@ -47,11 +48,16 @@ class Stats(commands.Cog):
 
         avatar_url = user.avatar.url
         try:
-            user_id = getUserId(username)
-            avatar_thumbnail = requests.get(f'https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={user_id}&size=420x420&format=Png')
-            avatar_url = avatar_thumbnail.json()["data"][0]["imageUrl"]
-        except:
-            None
+            user_id = await getUserId(username)
+            if user_id:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(
+                        f'https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={user_id}&size=420x420&format=Png'
+                    ) as avatar_thumbnail:
+                        data = await avatar_thumbnail.json()
+                        avatar_url = data["data"][0]["imageUrl"]
+        except Exception:
+            pass
         
         rank = user.top_role
 
