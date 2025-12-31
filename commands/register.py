@@ -39,16 +39,16 @@ class FrontDoor(discord.ui.Modal):
         self.add_item(self.inviter)
 
     async def on_submit(self, interaction: Interaction):
-      # Store in OLD inviter column (text)
-      self.supabase.rpc(
-          "register",
-          params={
-              "uid": interaction.user.id,
-              "u": self.username.value,
-              "r": self.reason.value,
-              "inv": self.inviter.value  # Back to text parameter
-          }
-      ).execute()
+        # Store in OLD inviter column (text)
+        self.supabase.rpc(
+            "register",
+            params={
+                "uid": interaction.user.id,
+                "u": self.username.value,
+                "r": self.reason.value,
+                "inv": self.inviter.value
+            }
+        ).execute()
 
         await interaction.response.send_message(
             "Thank you for your application to the CAA.",
@@ -69,7 +69,7 @@ class FrontDoor(discord.ui.Modal):
         embed.add_field(name="Stated Intent", value=self.reason.value, inline=False)
         embed.add_field(
             name="Referrer",
-            value=inviter_user.mention if inviter_user else "N/A",
+            value=self.inviter.value or "N/A",
             inline=False
         )
         embed.add_field(name="Status", value="In Review", inline=False)
