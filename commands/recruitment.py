@@ -12,8 +12,8 @@ class Invites(commands.Cog):
         self.supabase = bot.supabase
 
     @app_commands.command(
-        name="invites",
-        description="View list of people a user has invited."
+        name="recruitment",
+        description="View a players recruitment profile."
     )
     @app_commands.guilds(Object(id=GUILD_ID))
     async def invites(self, interaction: Interaction, user: discord.User):
