@@ -28,7 +28,7 @@ class FrontDoor(discord.ui.Modal):
             max_length=150,
             required=True
         )
-          self.inviter = discord.ui.TextInput(
+        self.inviter = discord.ui.TextInput(
             label='Referrer',
             placeholder='Who invited you or how did you find us?',
             max_length=25,
