@@ -6,7 +6,7 @@ import discord
 GUILD_ID = int(os.getenv("GUILDID"))
 
 
-class Invites(commands.Cog):
+class Recruitment(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.supabase = bot.supabase
@@ -71,4 +71,4 @@ class Invites(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(Invites(bot))
+    await bot.add_cog(Recruitment(bot))
