@@ -28,29 +28,27 @@ class FrontDoor(discord.ui.Modal):
             max_length=150,
             required=True
         )
-        self.inviter = discord.ui.UserSelect(
-            placeholder='Select who referred you',
-            min_values=0,
-            max_values=1
+          self.inviter = discord.ui.TextInput(
+            label='Referrer',
+            placeholder='Who invited you or how did you find us?',
+            max_length=25,
+            required=False  # Make it optional
         )
-
         self.add_item(self.username)
         self.add_item(self.reason)
         self.add_item(self.inviter)
 
     async def on_submit(self, interaction: Interaction):
-        inviter_user = self.inviter.values[0] if self.inviter.values else None
-        inviter_id = inviter_user.id if inviter_user else None
-
-        self.supabase.rpc(
-            "register",
-            params={
-                "uid": interaction.user.id,
-                "u": self.username.value,
-                "r": self.reason.value,
-                "inv_id": inviter_id
-            }
-        ).execute()
+      # Store in OLD inviter column (text)
+      self.supabase.rpc(
+          "register",
+          params={
+              "uid": interaction.user.id,
+              "u": self.username.value,
+              "r": self.reason.value,
+              "inv": self.inviter.value  # Back to text parameter
+          }
+      ).execute()
 
         await interaction.response.send_message(
             "Thank you for your application to the CAA.",
