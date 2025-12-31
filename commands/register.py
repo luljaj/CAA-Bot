@@ -32,14 +32,14 @@ class FrontDoor(discord.ui.Modal):
             label='Referrer',
             placeholder='Who invited you or how did you find us?',
             max_length=25,
-            required=False  # Make it optional
+            required=True
         )
+
         self.add_item(self.username)
         self.add_item(self.reason)
         self.add_item(self.inviter)
 
     async def on_submit(self, interaction: Interaction):
-        # Store in OLD inviter column (text)
         self.supabase.rpc(
             "register",
             params={
@@ -67,11 +67,7 @@ class FrontDoor(discord.ui.Modal):
         embed.add_field(name="Discord User", value=f"<@{interaction.user.id}>", inline=False)
         embed.add_field(name="Roblox User", value=self.username.value, inline=True)
         embed.add_field(name="Stated Intent", value=self.reason.value, inline=False)
-        embed.add_field(
-            name="Referrer",
-            value=self.inviter.value or "N/A",
-            inline=False
-        )
+        embed.add_field(name="Referrer", value=self.inviter.value or "N/A", inline=False)
         embed.add_field(name="Status", value="In Review", inline=False)
         embed.set_footer(text='Custom Adversaries Association', icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
 
