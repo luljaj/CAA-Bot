@@ -56,11 +56,11 @@ class Invites(commands.Cog):
             lines = ["No invites found."]
 
         embed = discord.Embed(
-            title=f"Invites - {user.name}",
-            description=f"Total invites: {invite_count}",
+            title=f"RECRUITMENT RECORD - {user.name}",
+            description=f"TOTAL RECRUITS: {invite_count}",
             color=user.top_role.color if user.top_role else discord.Color.dark_gray()
         )
-        embed.add_field(name="Invitees", value="\n".join(lines), inline=False)
+        embed.add_field(name="MEMBERS RECRUITED", value="\n".join(lines), inline=False)
         embed.set_thumbnail(url=user.avatar.url if user.avatar else None)
         embed.set_footer(
             text='Custom Adversaries Association',

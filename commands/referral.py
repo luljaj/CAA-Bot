@@ -88,8 +88,8 @@ class Referral(commands.Cog):
             return
 
         await interaction.response.send_message(
-            f"Set referrer to {user.mention}.",
-            ephemeral=True
+            f"Set referrer to {user.mention}. Thank you for your support.",
+            ephemeral=False
         )
 
 
