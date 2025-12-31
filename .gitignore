@@ -1,1 +1,6 @@
 .env
+commands/__pycache__
+cogs/__pycache__
+.claude
+
+*.md

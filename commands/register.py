@@ -28,11 +28,10 @@ class FrontDoor(discord.ui.Modal):
             max_length=150,
             required=True
         )
-        self.inviter = discord.ui.TextInput(
-            label='Referrer',
-            placeholder='Who invited you or how did you find us?',
-            max_length=25,
-            required=True
+        self.inviter = discord.ui.UserSelect(
+            placeholder='Select who referred you',
+            min_values=0,
+            max_values=1
         )
 
         self.add_item(self.username)
@@ -40,13 +39,16 @@ class FrontDoor(discord.ui.Modal):
         self.add_item(self.inviter)
 
     async def on_submit(self, interaction: Interaction):
+        inviter_user = self.inviter.values[0] if self.inviter.values else None
+        inviter_id = inviter_user.id if inviter_user else None
+
         self.supabase.rpc(
             "register",
             params={
                 "uid": interaction.user.id,
                 "u": self.username.value,
                 "r": self.reason.value,
-                "inv": self.inviter.value
+                "inv_id": inviter_id
             }
         ).execute()
 
@@ -67,7 +69,11 @@ class FrontDoor(discord.ui.Modal):
         embed.add_field(name="Discord User", value=f"<@{interaction.user.id}>", inline=False)
         embed.add_field(name="Roblox User", value=self.username.value, inline=True)
         embed.add_field(name="Stated Intent", value=self.reason.value, inline=False)
-        embed.add_field(name="Referrer", value=self.inviter.value or "N/A", inline=False)
+        embed.add_field(
+            name="Referrer",
+            value=inviter_user.mention if inviter_user else "N/A",
+            inline=False
+        )
         embed.add_field(name="Status", value="In Review", inline=False)
         embed.set_footer(text='Custom Adversaries Association', icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
 

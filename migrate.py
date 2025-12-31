@@ -58,7 +58,7 @@ class Migrate(commands.Cog):
             else:
                 name = m.name
             response =  (
-                self.supabase.rpc("register", params = {"uid":m.id, "u" : name, "r":"Unknown", "inv":"Unknown"})
+                self.supabase.rpc("register", params = {"uid":m.id, "u" : name, "r":"Unknown", "inv_id":None})
                 .execute()
             )
 

@@ -24,7 +24,7 @@ class Addfile(commands.Cog):
     async def addfile(self, interaction: Interaction, user: discord.User):
         self.user = user
         response =  (
-            self.supabase.rpc("register", params = {"uid":self.user.id, "u" :self.user.display_name, "r":"Unknown", "inv":"Unknown"})
+            self.supabase.rpc("register", params = {"uid":self.user.id, "u" :self.user.display_name, "r":"Unknown", "inv_id":None})
             .execute()
             )
         

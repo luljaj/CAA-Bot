@@ -50,6 +50,15 @@ class Stats(commands.Cog):
         
 
         id, discordid, username, eventswon, awards = response.data.values()
+        invite_count = 0
+        invite_response = (
+            self.supabase.rpc("get_user_invite_count", params={"uid": user.id})
+            .execute()
+        )
+        if invite_response.data:
+            invite_data = invite_response.data[0] if isinstance(invite_response.data, list) else invite_response.data
+            if isinstance(invite_data, dict):
+                invite_count = invite_data.get("invite_count", 0) or 0
 
         avatar_url = user.avatar.url
         try:
@@ -100,6 +109,7 @@ class Stats(commands.Cog):
         embed.add_field(name="POSITION", value=f'{rank.name}', inline=inline)
         embed.add_field(name="PERFORMANCE FILE", value="", inline=False)
         embed.add_field(name="EVENT WINS", value=eventswon, inline=inline)
+        embed.add_field(name="INVITES", value=invite_count, inline=inline)
         embed.add_field(name = f'AWARDS ({len(awards)})', value = awardsdisplay, inline = False)
         embed.set_thumbnail(url=avatar_url)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
