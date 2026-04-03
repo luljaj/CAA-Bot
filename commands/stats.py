@@ -49,7 +49,15 @@ class Stats(commands.Cog):
             return
         
 
-        id, discordid, username, eventswon, awards = response.data.values()
+        data = response.data
+        id = data["id"]
+        discordid = data["discordid"]
+        username = data["username"]
+        eventswon = data["eventswon"]
+        awards = data["awards"]
+        donations_total = data.get("donations", 0) or 0
+        points_total = data.get("points", 0) or 0
+
         invite_count = 0
         invite_response = (
             self.supabase.rpc("get_user_invite_count", params={"uid": user.id})
@@ -59,26 +67,6 @@ class Stats(commands.Cog):
             invite_data = invite_response.data[0] if isinstance(invite_response.data, list) else invite_response.data
             if isinstance(invite_data, dict):
                 invite_count = invite_data.get("invite_count", 0) or 0
-
-        donations_total = 0
-        don_response = (
-            self.supabase.rpc("fetchdonations", params={"uid": user.id})
-            .execute()
-        )
-        if don_response.data:
-            don_data = don_response.data[0] if isinstance(don_response.data, list) else don_response.data
-            if isinstance(don_data, dict):
-                donations_total = don_data.get("total", 0) or 0
-
-        points_total = 0
-        pts_response = (
-            self.supabase.rpc("fetchpoints", params={"uid": user.id})
-            .execute()
-        )
-        if pts_response.data:
-            pts_data = pts_response.data[0] if isinstance(pts_response.data, list) else pts_response.data
-            if isinstance(pts_data, dict):
-                points_total = pts_data.get("total", 0) or 0
 
         avatar_url = user.avatar.url
         try:

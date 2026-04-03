@@ -60,8 +60,8 @@ class Leaderboard(commands.Cog):
         entries = response.data
         id_key, value_key = FIELD_MAP[category]
         board = ""
-        medals = ["🥇", "🥈", "🥉", "4.", "5."]
-        for i, entry in enumerate(entries[:5]):
+        medals = ["🥇", "🥈", "🥉"]
+        for i, entry in enumerate(entries[:3]):
             discordid = entry.get(id_key)
             value = entry.get(value_key, 0)
             board += f"{medals[i]} <@{discordid}> — **{value}**\n"
