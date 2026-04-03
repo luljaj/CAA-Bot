@@ -60,6 +60,26 @@ class Stats(commands.Cog):
             if isinstance(invite_data, dict):
                 invite_count = invite_data.get("invite_count", 0) or 0
 
+        donations_total = 0
+        don_response = (
+            self.supabase.rpc("fetchdonations", params={"uid": user.id})
+            .execute()
+        )
+        if don_response.data:
+            don_data = don_response.data[0] if isinstance(don_response.data, list) else don_response.data
+            if isinstance(don_data, dict):
+                donations_total = don_data.get("total", 0) or 0
+
+        points_total = 0
+        pts_response = (
+            self.supabase.rpc("fetchpoints", params={"uid": user.id})
+            .execute()
+        )
+        if pts_response.data:
+            pts_data = pts_response.data[0] if isinstance(pts_response.data, list) else pts_response.data
+            if isinstance(pts_data, dict):
+                points_total = pts_data.get("total", 0) or 0
+
         avatar_url = user.avatar.url
         try:
             user_id = await getUserId(username)
@@ -110,6 +130,8 @@ class Stats(commands.Cog):
         embed.add_field(name="PERFORMANCE FILE", value="", inline=False)
         embed.add_field(name="EVENT WINS", value=eventswon, inline=inline)
         embed.add_field(name="REFERRALS", value=invite_count, inline=inline)
+        embed.add_field(name="INCOME", value=donations_total, inline=inline)
+        embed.add_field(name="POINTS", value=points_total, inline=inline)
         embed.add_field(name = f'AWARDS ({len(awards)})', value = awardsdisplay, inline = False)
         embed.set_thumbnail(url=avatar_url)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
