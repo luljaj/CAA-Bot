@@ -28,14 +28,14 @@ FIELD_MAP = {
 }
 
 
-class Leaderboard(commands.Cog):
+class Podium(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.supabase = bot.supabase
 
     @app_commands.command(
-        name="leaderboard",
-        description="View the top 5 in a category."
+        name="podium",
+        description="View the top 3 in a category."
     )
     @app_commands.describe(category="The category to rank by.")
     @app_commands.choices(category=[
@@ -45,7 +45,7 @@ class Leaderboard(commands.Cog):
         app_commands.Choice(name="Event Wins", value="eventwins"),
     ])
     @app_commands.guilds(Object(id=GUILD_ID))
-    async def leaderboard(self, interaction: Interaction, category: str):
+    async def podium(self, interaction: Interaction, category: str):
         await interaction.response.defer(thinking=True)
 
         rpc_name = RPC_MAP[category]
@@ -62,12 +62,12 @@ class Leaderboard(commands.Cog):
         board = ""
         medals = ["🥇", "🥈", "🥉"]
         for i, entry in enumerate(entries[:3]):
-            discordid = entry.get(id_key)
+            username = entry.get("username", "Unknown")
             value = entry.get(value_key, 0)
-            board += f"{medals[i]} <@{discordid}> — **{value}**\n"
+            board += f"{medals[i]} {username} — **{value}**\n"
 
         embed = discord.Embed(
-            title=f"📊 {label} LEADERBOARD",
+            title=f"🏆 {label} PODIUM",
             description=board,
             color=discord.Color.gold()
         )
@@ -80,4 +80,4 @@ class Leaderboard(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(Leaderboard(bot))
+    await bot.add_cog(Podium(bot))
