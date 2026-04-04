@@ -68,7 +68,7 @@ class Stats(commands.Cog):
             if isinstance(invite_data, dict):
                 invite_count = invite_data.get("invite_count", 0) or 0
 
-        avatar_url = user.avatar.url
+        avatar_url = user.avatar.url if user.avatar else user.default_avatar.url
         try:
             user_id = await getUserId(username)
             if user_id:
