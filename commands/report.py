@@ -5,13 +5,14 @@ import discord
 import time
 from datetime import datetime, timedelta, timezone
 
+from config import SERVER_ICON
+
 REPORT_COOLDOWN = 600  # seconds
 
 GUILD_ID = int(os.getenv("GUILDID"))
 REPORT_CHANNEL = "teamer-reports"
 REPORT_BAN_ROLE = "Teamer Banned"
 REPORT_PING_ROLE = 992939084760748032
-CAA_ICON = "https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024"
 
 
 class ClockInButton(discord.ui.Button):
@@ -255,13 +256,14 @@ class ReportModal(discord.ui.Modal):
         embed.set_thumbnail(url=interaction.user.display_avatar.url)
         embed.set_footer(
             text="0 clocked in · Custom Adversaries Association",
-            icon_url=CAA_ICON,
+            icon_url=SERVER_ICON,
         )
 
         view = ReportView(report_id, interaction.user.id, link)
 
         await interaction.response.send_message("Report submitted.", ephemeral=True)
-        message = await interaction.channel.send(
+        channel = interaction.guild.get_channel(interaction.channel_id)
+        message = await channel.send(
             content=f"<@&{REPORT_PING_ROLE}>",
             embed=embed,
             view=view,
