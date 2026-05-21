@@ -247,9 +247,9 @@ class Report(commands.Cog):
     @app_commands.guilds(Object(id=GUILD_ID))
     @app_commands.checks.cooldown(1, 600, key=lambda i: i.user.id)
     async def report(self, interaction: Interaction):
-        if interaction.channel.name != REPORT_CHANNEL:
+        if "teamer" not in interaction.channel.name.lower():
             await interaction.response.send_message(
-                f"This command can only be used in #{REPORT_CHANNEL}.", ephemeral=True,
+                "This command can only be used in a teamer support channel.", ephemeral=True,
             )
             return
 
