@@ -11,10 +11,10 @@ REPORT_PING_ROLE = 992939084760748032
 CAA_ICON = "https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024"
 
 
-class JoinButton(discord.ui.Button):
+class ClockInButton(discord.ui.Button):
     def __init__(self, report_id, roblox_link):
         super().__init__(
-            label="Join Report",
+            label="Clock In",
             style=discord.ButtonStyle.green,
             custom_id=f"join_report:{report_id}",
         )
@@ -39,22 +39,71 @@ class JoinButton(discord.ui.Button):
 
         if result["already_joined"]:
             await interaction.response.send_message(
-                "You've already joined this report.",
+                "You've already clocked in to this report.",
                 view=self._link_view(), ephemeral=True,
             )
             return
 
+        self.view.clocked_in.add(interaction.user.id)
+
         embed = interaction.message.embeds[0]
         old_icon = embed.footer.icon_url if embed.footer else None
         embed.set_footer(
-            text=f"{result['participant_count']} members joined · Custom Adversaries Association",
+            text=f"{result['participant_count']} clocked in · Custom Adversaries Association",
             icon_url=old_icon,
         )
         await interaction.message.edit(embed=embed)
         await interaction.response.send_message(
-            "You've joined! Stay until the end for credit.",
+            "You're clocked in! Make sure to clock out when the report ends to receive credit.",
             view=self._link_view(), ephemeral=True,
         )
+
+
+class ClockOutButton(discord.ui.Button):
+    def __init__(self, report_id, caller_id):
+        super().__init__(
+            label="Clock Out",
+            style=discord.ButtonStyle.primary,
+            custom_id=f"clock_out:{report_id}",
+        )
+        self.report_id = report_id
+        self.caller_id = caller_id
+
+    async def callback(self, interaction: Interaction):
+        if interaction.user.id not in self.view.clocked_in:
+            await interaction.response.send_message(
+                "You didn't clock in to this report.", ephemeral=True,
+            )
+            return
+
+        self.view.clocked_in.discard(interaction.user.id)
+
+        supabase = interaction.client.supabase
+        supabase.rpc("award_report_credit", {"user_id": interaction.user.id}).execute()
+
+        await interaction.response.send_message(
+            "Clocked out! Your report credit has been recorded.", ephemeral=True,
+        )
+
+
+class ClockOutView(discord.ui.View):
+    def __init__(self, report_id, caller_id, clocked_in: set):
+        super().__init__(timeout=300)
+        self.clocked_in = clocked_in
+        self.message = None
+        self.add_item(ClockOutButton(report_id, caller_id))
+
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+        if self.message:
+            try:
+                await self.message.edit(
+                    content="~~Clock out period has ended.~~",
+                    view=self,
+                )
+            except Exception:
+                pass
 
 
 class EndButton(discord.ui.Button):
@@ -74,14 +123,9 @@ class EndButton(discord.ui.Button):
             return
 
         supabase = interaction.client.supabase
-        participants = supabase.rpc(
-            "end_report", {"report_id": self.report_id}
-        ).execute().data or []
+        supabase.rpc("end_report", {"report_id": self.report_id}).execute()
 
-        mentions = []
-        for p in participants:
-            m = interaction.guild.get_member(p["user_id"])
-            mentions.append(m.mention if m else f"`{p['user_id']}` (left server)")
+        clocked_in = self.view.clocked_in.copy()
 
         old = interaction.message.embeds[0]
         ended = discord.Embed(
@@ -91,11 +135,6 @@ class EndButton(discord.ui.Button):
         )
         for f in old.fields:
             ended.add_field(name=f.name, value=f.value, inline=f.inline)
-        ended.add_field(
-            name=f"Participants ({len(mentions)})",
-            value="\n".join(mentions) if mentions else "None",
-            inline=False,
-        )
         if old.footer:
             ended.set_footer(text=old.footer.text, icon_url=old.footer.icon_url)
 
@@ -103,10 +142,14 @@ class EndButton(discord.ui.Button):
             child.disabled = True
         await interaction.response.edit_message(embed=ended, view=self.view)
 
-        if mentions:
-            await interaction.followup.send(
-                f"Participants for staff credit: {', '.join(mentions)}"
+        if clocked_in:
+            clock_out_view = ClockOutView(self.report_id, self.caller_id, clocked_in)
+            clock_out_msg = await interaction.followup.send(
+                f"To get credit for the report with <@{self.caller_id}>, make sure to clock out.",
+                view=clock_out_view,
+                wait=True,
             )
+            clock_out_view.message = clock_out_msg
 
         if hasattr(interaction.client, "active_reports"):
             interaction.client.active_reports.pop(self.report_id, None)
@@ -115,7 +158,8 @@ class EndButton(discord.ui.Button):
 class ReportView(discord.ui.View):
     def __init__(self, report_id, caller_id, roblox_link):
         super().__init__(timeout=None)
-        self.add_item(JoinButton(report_id, roblox_link))
+        self.clocked_in = set()
+        self.add_item(ClockInButton(report_id, roblox_link))
         self.add_item(EndButton(report_id, caller_id))
 
 
@@ -215,7 +259,7 @@ class ReportModal(discord.ui.Modal):
             embed.add_field(name="Notes", value=notes_val, inline=False)
         embed.add_field(name="Called By", value=f"<@{interaction.user.id}>", inline=False)
         embed.set_footer(
-            text="0 members joined · Custom Adversaries Association",
+            text="0 clocked in · Custom Adversaries Association",
             icon_url=CAA_ICON,
         )
 
