@@ -190,11 +190,12 @@ class ReportView(discord.ui.View):
 
 
 class ReportModal(discord.ui.Modal):
-    def __init__(self, bot, report_num: int):
+    def __init__(self, bot, report_num: int, cooldowns: dict):
         super().__init__(title=f"Report #{report_num}", timeout=None)
         self.bot = bot
         self.supabase = bot.supabase
         self.report_num = report_num
+        self._cooldowns = cooldowns
         self.roblox_link = discord.ui.TextInput(
             label="Roblox Link",
             placeholder="https://www.roblox.com/users/...",
@@ -252,6 +253,10 @@ class ReportModal(discord.ui.Modal):
             return
 
         notes_val = self.notes.value.strip() if self.notes.value else None
+
+        # All checks passed — lock in the cooldown now
+        if interaction.user.name != "larnagack":
+            self._cooldowns[interaction.user.id] = time.time()
 
         report_row = self.supabase.rpc("create_report", {
             "p_id": self.report_num,
@@ -325,7 +330,6 @@ class Report(commands.Cog):
                     f"You can call a report again <t:{retry_ts}:R>.", ephemeral=True,
                 )
                 return
-            self._cooldowns[interaction.user.id] = now
 
         if "teamer" not in interaction.channel.name.lower():
             await interaction.response.send_message(
@@ -356,7 +360,7 @@ class Report(commands.Cog):
             return
 
         report_num = self.supabase.rpc("reserve_report_id").execute().data
-        await interaction.response.send_modal(ReportModal(self.bot, report_num))
+        await interaction.response.send_modal(ReportModal(self.bot, report_num, self._cooldowns))
 
     @app_commands.command(name="lockreports", description="Lock reports globally or for a single user.")
     @app_commands.default_permissions(manage_events=True)
