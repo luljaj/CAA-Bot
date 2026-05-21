@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 GUILD_ID = int(os.getenv("GUILDID"))
 REPORT_CHANNEL = "teamer-reports"
 REPORT_BAN_ROLE = "Report Banned"
+REPORT_PING_ROLE = 992939084760748032
 CAA_ICON = "https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024"
 
 
@@ -221,7 +222,11 @@ class ReportModal(discord.ui.Modal):
         view = ReportView(report_id, interaction.user.id, link)
 
         await interaction.response.send_message("Report submitted.", ephemeral=True)
-        message = await interaction.channel.send(embed=embed, view=view)
+        message = await interaction.channel.send(
+            content=f"<@&{REPORT_PING_ROLE}>",
+            embed=embed,
+            view=view,
+        )
 
         self.supabase.rpc("set_report_message", {
             "report_id": report_id,
@@ -240,6 +245,7 @@ class Report(commands.Cog):
 
     @app_commands.command(name="report", description="Call a teamer report.")
     @app_commands.guilds(Object(id=GUILD_ID))
+    @app_commands.checks.cooldown(1, 600, key=lambda i: i.user.id)
     async def report(self, interaction: Interaction):
         if interaction.channel.name != REPORT_CHANNEL:
             await interaction.response.send_message(
@@ -270,6 +276,16 @@ class Report(commands.Cog):
             return
 
         await interaction.response.send_modal(ReportModal(self.bot))
+
+    @report.error
+    async def report_error(self, interaction: Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            retry_ts = int((datetime.now(timezone.utc) + timedelta(seconds=error.retry_after)).timestamp())
+            await interaction.response.send_message(
+                f"You can call a report again <t:{retry_ts}:R>.", ephemeral=True,
+            )
+        else:
+            raise error
 
     @app_commands.command(name="lockreports", description="Lock reports globally or for a single user.")
     @app_commands.default_permissions(manage_events=True)
