@@ -33,6 +33,15 @@ async def setup_hook():
             await bot.load_extension(f"commands.{filename[:-3]}")
 
     await bot.load_extension("cogs.frontdoorcleaner")
+    await bot.load_extension("cogs.expirycleaner")
+
+    bot.active_reports = {}
+    from commands.report import ReportView
+    active = supabase.rpc("get_all_active_reports").execute().data or []
+    for r in active:
+        view = ReportView(r["id"], r["caller_id"], r["roblox_link"])
+        bot.add_view(view, message_id=r["message_id"])
+        bot.active_reports[r["id"]] = view
 
     guild = discord.Object(id=GUILD_ID)
     await bot.tree.sync(guild=guild)

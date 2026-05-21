@@ -1,10 +1,7 @@
 from discord.ext import commands
 from discord import app_commands, Interaction, Object
 import os
-import sqlite3
 import discord
-import requests
-import json
 
 GUILD_ID = int(os.getenv("GUILDID"))
 

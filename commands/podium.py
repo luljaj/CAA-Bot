@@ -10,6 +10,7 @@ RPC_MAP = {
     "income": "top_donations",
     "referrals": "top_recruitment",
     "eventwins": "top_events",
+    "reports": "top_reports",
 }
 
 LABEL_MAP = {
@@ -17,14 +18,16 @@ LABEL_MAP = {
     "income": "INCOME",
     "referrals": "REFERRALS",
     "eventwins": "EVENT WINS",
+    "reports": "REPORTS",
 }
 
 # (id_key, value_key) for each category's RPC return schema
 FIELD_MAP = {
-    "points":   ("discordid", "points"),
-    "income":   ("discordid", "donations"),
-    "referrals":("inviter_id", "invite_count"),
-    "eventwins":("discordid", "eventswon"),
+    "points":    ("discordid", "points"),
+    "income":    ("discordid", "donations"),
+    "referrals": ("inviter_id", "invite_count"),
+    "eventwins": ("discordid", "eventswon"),
+    "reports":   ("discordid", "reports_answered"),
 }
 
 
@@ -43,6 +46,7 @@ class Podium(commands.Cog):
         app_commands.Choice(name="Income", value="income"),
         app_commands.Choice(name="Referrals", value="referrals"),
         app_commands.Choice(name="Event Wins", value="eventwins"),
+        app_commands.Choice(name="Reports", value="reports"),
     ])
     @app_commands.guilds(Object(id=GUILD_ID))
     async def podium(self, interaction: Interaction, category: str):

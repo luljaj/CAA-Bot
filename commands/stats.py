@@ -57,6 +57,7 @@ class Stats(commands.Cog):
         awards = data["awards"]
         donations_total = data.get("donations", 0) or 0
         points_total = data.get("points", 0) or 0
+        reports_answered = data.get("reports_answered", 0) or 0
 
         invite_count = 0
         invite_response = (
@@ -120,6 +121,7 @@ class Stats(commands.Cog):
         embed.add_field(name="REFERRALS", value=invite_count, inline=inline)
         embed.add_field(name="INCOME", value=donations_total, inline=inline)
         embed.add_field(name="POINTS", value=points_total, inline=inline)
+        embed.add_field(name="REPORTS", value=reports_answered, inline=inline)
         embed.add_field(name = f'AWARDS ({len(awards)})', value = awardsdisplay, inline = False)
         embed.set_thumbnail(url=avatar_url)
         embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
