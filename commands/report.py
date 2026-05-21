@@ -171,10 +171,6 @@ class ReportModal(discord.ui.Modal):
         super().__init__(title="Teamer Report", timeout=None)
         self.bot = bot
         self.supabase = bot.supabase
-        self.game = discord.ui.TextInput(
-            label="Game", placeholder="e.g. MM2, Blade Ball",
-            max_length=50, required=True,
-        )
         self.roblox_link = discord.ui.TextInput(
             label="Roblox Link",
             placeholder="https://www.roblox.com/games/...",
@@ -190,7 +186,7 @@ class ReportModal(discord.ui.Modal):
             label="Notes", style=discord.TextStyle.paragraph,
             max_length=200, required=False,
         )
-        for item in (self.game, self.roblox_link, self.enemies, self.notes):
+        for item in (self.roblox_link, self.enemies, self.notes):
             self.add_item(item)
 
     async def on_submit(self, interaction: Interaction):
@@ -216,13 +212,6 @@ class ReportModal(discord.ui.Modal):
             )
             return
 
-        active = self.supabase.rpc("get_active_report", {"game": self.game.value}).execute().data
-        if active:
-            await interaction.response.send_message(
-                f"An active report for **{self.game.value}** already exists.", ephemeral=True,
-            )
-            return
-
         link = self.roblox_link.value.strip()
         if not (link.startswith("https://www.roblox.com/") or link.startswith("https://roblox.com/")):
             await interaction.response.send_message(
@@ -242,7 +231,7 @@ class ReportModal(discord.ui.Modal):
 
         report_row = self.supabase.rpc("create_report", {
             "caller_id": interaction.user.id,
-            "game": self.game.value,
+            "game": "",
             "roblox_link": link,
             "enemies": self.enemies.value,
             "notes": notes_val,
