@@ -104,7 +104,13 @@ class ClockOutButton(discord.ui.Button):
         self.view.clocked_in.discard(interaction.user.id)
 
         supabase = interaction.client.supabase
-        supabase.rpc("award_report_credit", {"user_id": interaction.user.id}).execute()
+        stats = supabase.rpc("fetchstats", {"uid": interaction.user.id}).execute().data
+        if stats:
+            current = stats.get("reports_answered", 0) or 0
+            supabase.rpc("set_report_count", {
+                "edit_val": current + 1,
+                "uid": interaction.user.id,
+            }).execute()
 
         await interaction.response.send_message(
             "Clocked out! Your report credit has been recorded.", ephemeral=True,
