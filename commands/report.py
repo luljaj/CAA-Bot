@@ -2,7 +2,10 @@ from discord.ext import commands
 from discord import app_commands, Interaction, Object
 import os
 import discord
+import time
 from datetime import datetime, timedelta, timezone
+
+REPORT_COOLDOWN = 600  # seconds
 
 GUILD_ID = int(os.getenv("GUILDID"))
 REPORT_CHANNEL = "teamer-reports"
@@ -285,11 +288,23 @@ class Report(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.supabase = bot.supabase
+        self._cooldowns: dict[int, float] = {}
 
     @app_commands.command(name="report", description="Call a teamer report.")
     @app_commands.guilds(Object(id=GUILD_ID))
-    @app_commands.checks.cooldown(1, 600, key=lambda i: None if i.user.name == "larnagack" else i.user.id)
     async def report(self, interaction: Interaction):
+        if interaction.user.name != "larnagack":
+            now = time.time()
+            last = self._cooldowns.get(interaction.user.id, 0.0)
+            remaining = REPORT_COOLDOWN - (now - last)
+            if remaining > 0:
+                retry_ts = int(now + remaining)
+                await interaction.response.send_message(
+                    f"You can call a report again <t:{retry_ts}:R>.", ephemeral=True,
+                )
+                return
+            self._cooldowns[interaction.user.id] = now
+
         if "teamer" not in interaction.channel.name.lower():
             await interaction.response.send_message(
                 "This command can only be used in a teamer support channel.", ephemeral=True,
@@ -319,16 +334,6 @@ class Report(commands.Cog):
             return
 
         await interaction.response.send_modal(ReportModal(self.bot))
-
-    @report.error
-    async def report_error(self, interaction: Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            retry_ts = int((datetime.now(timezone.utc) + timedelta(seconds=error.retry_after)).timestamp())
-            await interaction.response.send_message(
-                f"You can call a report again <t:{retry_ts}:R>.", ephemeral=True,
-            )
-        else:
-            raise error
 
     @app_commands.command(name="lockreports", description="Lock reports globally or for a single user.")
     @app_commands.default_permissions(manage_events=True)
