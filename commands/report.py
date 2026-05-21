@@ -132,12 +132,13 @@ class EndButton(discord.ui.Button):
 
         old = interaction.message.embeds[0]
         ended = discord.Embed(
-            title="✅ Report Ended",
-            description=old.description,
+            title="✅ REPORT ENDED",
             color=discord.Color.dark_grey(),
         )
         for f in old.fields:
             ended.add_field(name=f.name, value=f.value, inline=f.inline)
+        if old.thumbnail:
+            ended.set_thumbnail(url=old.thumbnail.url)
         if old.footer:
             ended.set_footer(text=old.footer.text, icon_url=old.footer.icon_url)
 
@@ -173,7 +174,7 @@ class ReportModal(discord.ui.Modal):
         self.supabase = bot.supabase
         self.roblox_link = discord.ui.TextInput(
             label="Roblox Link",
-            placeholder="https://www.roblox.com/games/...",
+            placeholder="https://www.roblox.com/users/...",
             max_length=200, required=True,
         )
         self.enemies = discord.ui.TextInput(
@@ -241,14 +242,17 @@ class ReportModal(discord.ui.Modal):
         report_id = report_row["id"]
 
         embed = discord.Embed(
-            title="⚠️ Teamer Report",
-            description=f"Link: {link}",
+            title=f"⚠️ {interaction.user.display_name} - TEAMER REPORT",
             color=discord.Color.red(),
         )
-        embed.add_field(name="Enemies", value="\n".join(enemy_lines), inline=False)
+        embed.add_field(name="INCIDENT FILE", value="", inline=False)
+        embed.add_field(name="CALLER", value=f"<@{interaction.user.id}>", inline=True)
+        embed.add_field(name="LINK", value=link, inline=True)
+        embed.add_field(name="OPPONENTS", value="", inline=False)
+        embed.add_field(name="​", value="\n".join(enemy_lines), inline=False)
         if notes_val:
-            embed.add_field(name="Notes", value=notes_val, inline=False)
-        embed.add_field(name="Called By", value=f"<@{interaction.user.id}>", inline=False)
+            embed.add_field(name="NOTES", value=notes_val, inline=False)
+        embed.set_thumbnail(url=interaction.user.display_avatar.url)
         embed.set_footer(
             text="0 clocked in · Custom Adversaries Association",
             icon_url=CAA_ICON,
