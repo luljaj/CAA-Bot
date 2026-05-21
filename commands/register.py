@@ -5,6 +5,8 @@ import discord
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from config import SERVER_ICON
+
 GUILD_ID = int(os.getenv("GUILDID"))
 REVIEW_CHANNEL = 1382493785400934410
 INTERN_ROLE_NAME = "Intern"
@@ -69,7 +71,7 @@ class FrontDoor(discord.ui.Modal):
         embed.add_field(name="Stated Intent", value=self.reason.value, inline=False)
         embed.add_field(name="Referrer", value=self.inviter.value or "N/A", inline=False)
         embed.add_field(name="Status", value="In Review", inline=False)
-        embed.set_footer(text='Custom Adversaries Association', icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
+        embed.set_footer(text='Custom Adversaries Association', icon_url=SERVER_ICON)
 
 
         channel = self.bot.get_channel(REVIEW_CHANNEL)

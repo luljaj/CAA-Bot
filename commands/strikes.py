@@ -3,9 +3,9 @@ from discord import app_commands, Interaction, Object
 import os
 import discord
 from datetime import datetime
+from config import SERVER_ICON
 
 GUILD_ID = int(os.getenv("GUILDID"))
-CAA_ICON = "https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024"
 
 
 def _fmt_ts(iso_str, style="F"):
@@ -64,7 +64,7 @@ class Strikes(commands.Cog):
         embed.add_field(name="Expires", value=_fmt_ts(row.get("expires_at", ""), "F"), inline=True)
         embed.add_field(name="Issued By", value=interaction.user.mention, inline=True)
         embed.add_field(name="Total Active Strikes", value=str(total_active), inline=True)
-        embed.set_footer(text="Custom Adversaries Association", icon_url=CAA_ICON)
+        embed.set_footer(text="Custom Adversaries Association", icon_url=SERVER_ICON)
 
         await interaction.response.send_message(embed=embed)
 
@@ -105,7 +105,7 @@ class Strikes(commands.Cog):
 
         embed.set_footer(
             text="Strike consequence system TBD · Custom Adversaries Association",
-            icon_url=CAA_ICON,
+            icon_url=SERVER_ICON,
         )
         await interaction.response.send_message(embed=embed)
 

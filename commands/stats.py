@@ -5,6 +5,8 @@ import discord
 from collections import defaultdict
 import aiohttp
 
+from config import SERVER_ICON
+
 GUILD_ID = int(os.getenv("GUILDID"))
 
 
@@ -124,7 +126,7 @@ class Stats(commands.Cog):
         embed.add_field(name="REPORTS", value=reports_answered, inline=inline)
         embed.add_field(name = f'AWARDS ({len(awards)})', value = awardsdisplay, inline = False)
         embed.set_thumbnail(url=avatar_url)
-        embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
+        embed.set_footer(text = 'Custom Adversaries Association', icon_url=SERVER_ICON)
 
         await interaction.followup.send(embed=embed)
 

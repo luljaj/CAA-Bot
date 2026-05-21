@@ -1,0 +1,1 @@
+SERVER_ICON = "https://images-ext-1.discordapp.net/external/8zvqGh0uPdc05QkNHhjjb2Fk5mWJo9347j8ifJcT8k8/%3Fsize%3D256/https/cdn.discordapp.com/icons/938810131800543333/9cec5b222e8564fb73c3ca1f9c9944fd.png?format=webp&quality=lossless&width=512&height=512"

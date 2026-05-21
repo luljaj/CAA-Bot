@@ -3,6 +3,8 @@ from discord import app_commands, Interaction, Object
 import os
 import discord
 
+from config import SERVER_ICON
+
 GUILD_ID = int(os.getenv("GUILDID"))
 
 RPC_MAP = {
@@ -77,7 +79,7 @@ class Podium(commands.Cog):
         )
         embed.set_footer(
             text='Custom Adversaries Association',
-            icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024'
+            icon_url=SERVER_ICON
         )
 
         await interaction.followup.send(embed=embed)

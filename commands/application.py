@@ -7,6 +7,8 @@ import supabase
 from datetime import datetime
 
 
+from config import SERVER_ICON
+
 GUILD_ID = int(os.getenv("GUILDID"))
 
 
@@ -96,7 +98,7 @@ class Application(commands.Cog):
 
         embed.add_field(name="Referrer", value=inviter_display, inline=False)
         embed.add_field(name="Submission Date", value=formatted or "N/A", inline=False)
-        embed.set_footer(text = 'Custom Adversaries Association', icon_url='https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024')
+        embed.set_footer(text = 'Custom Adversaries Association', icon_url=SERVER_ICON)
 
         await interaction.response.send_message(embed=embed)
 
