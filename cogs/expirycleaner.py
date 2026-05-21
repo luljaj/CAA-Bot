@@ -3,7 +3,7 @@ import os
 import discord
 
 GUILD_ID = int(os.getenv("GUILDID"))
-REPORT_BAN_ROLE = "Report Banned"
+REPORT_BAN_ROLE = "Teamer Banned"
 
 
 class ExpiryCleaner(commands.Cog):

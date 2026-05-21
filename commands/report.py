@@ -9,7 +9,7 @@ REPORT_COOLDOWN = 600  # seconds
 
 GUILD_ID = int(os.getenv("GUILDID"))
 REPORT_CHANNEL = "teamer-reports"
-REPORT_BAN_ROLE = "Report Banned"
+REPORT_BAN_ROLE = "Teamer Banned"
 REPORT_PING_ROLE = 992939084760748032
 CAA_ICON = "https://cdn.discordapp.com/icons/938810131800543333/a5572ec6502690f351ab956dd5a67d8e.png?size=1024"
 
