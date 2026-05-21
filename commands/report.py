@@ -277,7 +277,7 @@ class ReportModal(discord.ui.Modal):
             title=f"{interaction.user.display_name} - TEAMER REPORT",
             color=discord.Color.red(),
         )
-        embed.add_field(name="INCIDENT FILE", value="", inline=False)
+        embed.add_field(name=f"INCIDENT #{report_id}", value="", inline=False)
         embed.add_field(name="CALLER", value=f"<@{interaction.user.id}>", inline=False)
         embed.add_field(name="OPPONENTS", value="", inline=False)
         embed.add_field(name="​", value="\n".join(enemy_lines), inline=False)
