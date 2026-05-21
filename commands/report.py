@@ -79,7 +79,7 @@ class ClockInButton(discord.ui.Button):
         )
         await interaction.message.edit(embed=embed)
         await interaction.response.send_message(
-            "You're clocked in! Make sure to clock out when the report ends to receive credit.",
+            "You're clocked in. Make sure to clock out when the report ends to receive credit.",
             view=self._link_view(), ephemeral=True,
         )
 
@@ -107,7 +107,7 @@ class ClockOutButton(discord.ui.Button):
         supabase.rpc("award_report_credit", {"user_id": interaction.user.id}).execute()
 
         await interaction.response.send_message(
-            "Clocked out! Your report credit has been recorded.", ephemeral=True,
+            "Clocked out. Your service is appreciated.", ephemeral=True,
         )
 
 
