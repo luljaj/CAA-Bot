@@ -253,7 +253,6 @@ class ReportModal(discord.ui.Modal):
             description=f"Link: {link}",
             color=discord.Color.red(),
         )
-        embed.add_field(name="Game", value=self.game.value, inline=True)
         embed.add_field(name="Enemies", value="\n".join(enemy_lines), inline=False)
         if notes_val:
             embed.add_field(name="Notes", value=notes_val, inline=False)
