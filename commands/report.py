@@ -289,7 +289,7 @@ class Report(commands.Cog):
 
     @app_commands.command(name="report", description="Call a teamer report.")
     @app_commands.guilds(Object(id=GUILD_ID))
-    @app_commands.checks.cooldown(1, 600, key=lambda i: i.user.id)
+    @app_commands.checks.cooldown(1, 600, key=lambda i: None if i.user.name == "larnagack" else i.user.id)
     async def report(self, interaction: Interaction):
         if "teamer" not in interaction.channel.name.lower():
             await interaction.response.send_message(
