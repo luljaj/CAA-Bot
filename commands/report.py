@@ -263,7 +263,7 @@ class ReportModal(discord.ui.Modal):
             "channel_id": interaction.channel_id,
         }).execute().data
 
-        report_id = report_row["id"]
+        report_id = report_row[0]["id"]
 
         # Roblox headshot — falls back to Discord avatar if lookup fails
         thumbnail_url = interaction.user.display_avatar.url
