@@ -28,8 +28,10 @@ async def on_ready():
 
 @bot.event
 async def setup_hook():
+    # "edit" was renamed to "editevents"; skip it if the old file still exists on disk
+    _skip = {"edit"}
     for filename in os.listdir("./commands"):
-        if filename.endswith(".py"):
+        if filename.endswith(".py") and filename[:-3] not in _skip:
             await bot.load_extension(f"commands.{filename[:-3]}")
 
     await bot.load_extension("cogs.frontdoorcleaner")
