@@ -6,7 +6,7 @@ import discord
 GUILD_ID = int(os.getenv("GUILDID"))
 
 
-class Editevents(commands.Cog):
+class EditEvents(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.supabase = bot.supabase
@@ -32,4 +32,4 @@ class Editevents(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(Editevents(bot))
+    await bot.add_cog(EditEvents(bot))
