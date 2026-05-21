@@ -201,7 +201,7 @@ class ReportModal(discord.ui.Modal):
         )
         self.enemies = discord.ui.TextInput(
             label="Enemies",
-            placeholder="Must have 3 or more enemies to call a report",
+            placeholder="Must have 3 or more enemies to call a report. Put each enemy name on a separate line.",
             style=discord.TextStyle.paragraph,
             max_length=500, required=True,
         )
