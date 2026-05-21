@@ -3,11 +3,32 @@ from discord import app_commands, Interaction, Object
 import os
 import discord
 import time
+import aiohttp
 from datetime import datetime, timedelta, timezone
 
 from config import SERVER_ICON
 
 REPORT_COOLDOWN = 600  # seconds
+
+
+async def _get_roblox_headshot(username: str) -> str | None:
+    """Return a Roblox headshot URL for the given username, or None on failure."""
+    try:
+        url = f"https://www.roblox.com/users/profile?username={username}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, allow_redirects=True) as resp:
+                parts = str(resp.url).split("/")
+                if len(parts) <= 4:
+                    return None
+                roblox_id = parts[4]
+            async with session.get(
+                f"https://thumbnails.roblox.com/v1/users/avatar-headshot"
+                f"?userIds={roblox_id}&size=420x420&format=Png"
+            ) as resp:
+                data = await resp.json()
+                return data["data"][0]["imageUrl"]
+    except Exception:
+        return None
 
 GUILD_ID = int(os.getenv("GUILDID"))
 REPORT_CHANNEL = "teamer-reports"
@@ -133,7 +154,7 @@ class EndButton(discord.ui.Button):
 
         old = interaction.message.embeds[0]
         ended = discord.Embed(
-            title="✅ REPORT ENDED",
+            title="REPORT ENDED",
             color=discord.Color.dark_grey(),
         )
         for f in old.fields:
@@ -242,18 +263,25 @@ class ReportModal(discord.ui.Modal):
 
         report_id = report_row["id"]
 
+        # Roblox headshot — falls back to Discord avatar if lookup fails
+        thumbnail_url = interaction.user.display_avatar.url
+        stats_data = self.supabase.rpc("fetchstats", params={"uid": interaction.user.id}).execute().data
+        if stats_data and stats_data.get("username"):
+            headshot = await _get_roblox_headshot(stats_data["username"])
+            if headshot:
+                thumbnail_url = headshot
+
         embed = discord.Embed(
-            title=f"⚠️ {interaction.user.display_name} - TEAMER REPORT",
+            title=f"{interaction.user.display_name} - TEAMER REPORT",
             color=discord.Color.red(),
         )
         embed.add_field(name="INCIDENT FILE", value="", inline=False)
-        embed.add_field(name="CALLER", value=f"<@{interaction.user.id}>", inline=True)
-        embed.add_field(name="LINK", value=link, inline=True)
+        embed.add_field(name="CALLER", value=f"<@{interaction.user.id}>", inline=False)
         embed.add_field(name="OPPONENTS", value="", inline=False)
         embed.add_field(name="​", value="\n".join(enemy_lines), inline=False)
         if notes_val:
             embed.add_field(name="NOTES", value=notes_val, inline=False)
-        embed.set_thumbnail(url=interaction.user.display_avatar.url)
+        embed.set_thumbnail(url=thumbnail_url)
         embed.set_footer(
             text="0 clocked in · Custom Adversaries Association",
             icon_url=SERVER_ICON,
@@ -263,11 +291,8 @@ class ReportModal(discord.ui.Modal):
 
         await interaction.response.send_message("Report submitted.", ephemeral=True)
         channel = interaction.guild.get_channel(interaction.channel_id)
-        message = await channel.send(
-            content=f"<@&{REPORT_PING_ROLE}>",
-            embed=embed,
-            view=view,
-        )
+        message = await channel.send(embed=embed, view=view)
+        await channel.send(content=f"<@&{REPORT_PING_ROLE}>")
 
         self.supabase.rpc("set_report_message", {
             "report_id": report_id,
