@@ -57,7 +57,7 @@ class Strikes(commands.Cog):
         active_strikes = self.supabase.rpc("get_strikes", {"user_id": user.id}).execute().data or []
         total_active = sum(s.get("count", 1) for s in active_strikes)
 
-        embed = discord.Embed(title="⚠️ Strike Issued", color=discord.Color.orange())
+        embed = discord.Embed(title="Strike Issued", color=discord.Color.orange())
         embed.add_field(name="User", value=user.mention, inline=True)
         embed.add_field(name="Count", value=str(count), inline=True)
         embed.add_field(name="Reason", value=reason, inline=False)
@@ -78,7 +78,7 @@ class Strikes(commands.Cog):
         shown = all_strikes[:15]
 
         embed = discord.Embed(
-            title=f"📋 Strikes — {user.display_name}",
+            title=f"Strikes — {user.display_name}",
             color=discord.Color.orange(),
         )
 
