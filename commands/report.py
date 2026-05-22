@@ -102,6 +102,7 @@ class ClockOutButton(discord.ui.Button):
             return
 
         self.view.clocked_in.discard(interaction.user.id)
+        self.view.clocked_out.append(interaction.user.mention)
 
         supabase = interaction.client.supabase
         supabase.rpc("award_report_credit", {"user_id": interaction.user.id}).execute()
@@ -115,6 +116,7 @@ class ClockOutView(discord.ui.View):
     def __init__(self, report_id, caller_id, clocked_in: set):
         super().__init__(timeout=300)
         self.clocked_in = clocked_in
+        self.clocked_out: list[str] = []
         self.message = None
         self.add_item(ClockOutButton(report_id, caller_id))
 
@@ -123,10 +125,12 @@ class ClockOutView(discord.ui.View):
             child.disabled = True
         if self.message:
             try:
-                await self.message.edit(
-                    content="~~Clock out period has ended.~~",
-                    view=self,
-                )
+                if self.clocked_out:
+                    credit_list = "\n".join(self.clocked_out)
+                    content = f"~~Clock out period has ended.~~\n\n**Members receiving report credit:**\n{credit_list}"
+                else:
+                    content = "~~Clock out period has ended.~~ No members clocked out."
+                await self.message.edit(content=content, view=self)
             except Exception:
                 pass
 
