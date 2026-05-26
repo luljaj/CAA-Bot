@@ -34,9 +34,9 @@ class PromoteModal(discord.ui.Modal):
         self.application_record = application_record
 
         self.references = discord.ui.TextInput(
-            label="Who are two people who can testify to your CAA contributions?",
+            label="Who are two members who can testify to your CAA contributions?",
             style=discord.TextStyle.paragraph,
-            placeholder="Both members must be Respected Employee or above.",
+            placeholder="Both must be Respected or above.",
             max_length=1024,
             required=True,
         )
