@@ -1,10 +1,9 @@
 from discord.ext import commands
 from discord import app_commands, Interaction, Object
 import os
-import sqlite3
 import discord
-import requests
-import json
+
+from config import get_employee_role, get_intern_role
 
 GUILD_ID = int(os.getenv("GUILDID"))
 
@@ -24,8 +23,14 @@ class Employee(commands.Cog):
     async def employee(self, interaction: Interaction, user: discord.User):
         self.user = user
 
-        employee = discord.utils.get(interaction.guild.roles, name="Employee")
-        intern = discord.utils.get(interaction.guild.roles, name="Intern")
+        employee = get_employee_role(interaction.guild)
+        intern = get_intern_role(interaction.guild)
+        if employee is None or intern is None:
+            await interaction.response.send_message(
+                "Employee or Intern role is not configured.",
+                ephemeral=True
+            )
+            return
         
         await self.user.add_roles(employee, reason = f'Employee promoted by <@{interaction.user.name}>')
         await self.user.remove_roles(intern, reason = f'Employee promoted by <@{interaction.user.name}>')

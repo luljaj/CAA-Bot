@@ -36,6 +36,7 @@ async def setup_hook():
 
     await bot.load_extension("cogs.frontdoorcleaner")
     await bot.load_extension("cogs.expirycleaner")
+    await bot.load_extension("cogs.promotionalerts")
 
     bot.active_reports = {}
     from commands.report import ReportView
