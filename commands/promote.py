@@ -34,14 +34,16 @@ class PromoteModal(discord.ui.Modal):
         self.application_record = application_record
 
         self.references = discord.ui.TextInput(
-            label="Who can we ask? (respected)+",
+            label="Who are two people who can testify to your CAA contributions?",
             style=discord.TextStyle.paragraph,
+            placeholder="Both members must be Respected Employee or above.",
             max_length=1024,
             required=True,
         )
         self.statement = discord.ui.TextInput(
-            label="Why should we promote you?",
+            label="Why do you want to be an employee in the CAA?",
             style=discord.TextStyle.paragraph,
+            placeholder="2 sentence minimum",
             max_length=1024,
             required=True,
         )
