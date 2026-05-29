@@ -13,9 +13,7 @@ from config import (
     get_promotion_rollout_cutoff,
 )
 from review_utils import (
-    PROMOTION_ALERT_MARKER,
     REGISTER_REQUEST_MARKER,
-    build_footer_text,
     get_embed_field,
     parse_footer_marker,
     safe_embed_value,
@@ -51,12 +49,11 @@ class PromotionAlerts(commands.Cog):
                 continue
 
             embed = message.embeds[0]
-            marker_type, marker_values = parse_footer_marker(embed.footer.text)
-            if marker_type != PROMOTION_ALERT_MARKER:
+            if embed.title != "⏰ Intern Promotion Follow-Up":
                 continue
 
-            user_id = marker_values.get("user_id")
-            week_marker = marker_values.get("week")
+            user_id = get_embed_field(embed, "Discord ID")
+            week_marker = get_embed_field(embed, "Alert Week")
             if user_id and week_marker:
                 markers.add((int(user_id), int(week_marker)))
 
@@ -123,11 +120,7 @@ class PromotionAlerts(commands.Cog):
         )
         embed.add_field(name="Alert Week", value=str(week_marker), inline=False)
         embed.set_footer(
-            text=build_footer_text(
-                PROMOTION_ALERT_MARKER,
-                user_id=member.id,
-                week=week_marker,
-            ),
+            text="Custom Adversaries Association",
             icon_url=SERVER_ICON,
         )
 
