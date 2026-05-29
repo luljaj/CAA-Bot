@@ -68,6 +68,40 @@ class Strikes(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
+    @app_commands.command(name="unstrike", description="Remove a user's most recent active strike.")
+    @app_commands.default_permissions(manage_events=True)
+    @app_commands.guilds(Object(id=GUILD_ID))
+    @app_commands.describe(user="The user whose most recent strike should be removed.")
+    async def unstrike(self, interaction: Interaction, user: discord.Member):
+        removed = self.supabase.rpc("remove_latest_strike", {
+            "user_id": user.id,
+        }).execute().data
+
+        if not removed:
+            await interaction.response.send_message(
+                f"{user.mention} has no active strikes to remove.",
+                ephemeral=True,
+            )
+            return
+
+        active_strikes = self.supabase.rpc("get_strikes", {"user_id": user.id}).execute().data or []
+        total_active = sum(s.get("count", 1) for s in active_strikes)
+
+        embed = discord.Embed(title="Strike Removed", color=discord.Color.green())
+        embed.add_field(name="User", value=user.mention, inline=True)
+        embed.add_field(name="Removed Count", value=str(removed.get("count", 1)), inline=True)
+        embed.add_field(name="Removed By", value=interaction.user.mention, inline=True)
+        embed.add_field(name="Reason", value=removed.get("reason", "N/A"), inline=False)
+        embed.add_field(
+            name="Originally Issued",
+            value=_fmt_ts(removed.get("created_at", ""), "F"),
+            inline=True,
+        )
+        embed.add_field(name="Total Active Strikes", value=str(total_active), inline=True)
+        embed.set_footer(text="Custom Adversaries Association", icon_url=SERVER_ICON)
+
+        await interaction.response.send_message(embed=embed)
+
     @app_commands.command(name="strikes", description="View a user's active strikes.")
     @app_commands.default_permissions(manage_events=True)
     @app_commands.guilds(Object(id=GUILD_ID))
@@ -103,10 +137,6 @@ class Strikes(commands.Cog):
                     inline=False,
                 )
 
-        embed.set_footer(
-            text="Strike consequence system TBD · Custom Adversaries Association",
-            icon_url=SERVER_ICON,
-        )
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="setstrikeduration", description="Set the default strike duration in days.")

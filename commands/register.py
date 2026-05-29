@@ -8,10 +8,7 @@ from zoneinfo import ZoneInfo
 
 from config import ENTRY_REVIEW_CHANNEL_ID, SERVER_ICON, get_intern_role
 from review_utils import (
-    REGISTER_REQUEST_MARKER,
-    build_footer_text,
     get_embed_field,
-    parse_footer_marker,
     replace_embed_field,
 )
 
@@ -89,11 +86,7 @@ class FrontDoor(discord.ui.Modal):
         embed.add_field(name="Stated Intent", value=self.reason.value, inline=False)
         embed.add_field(name="Referrer", value=self.inviter.value or "N/A", inline=False)
         embed.add_field(name="Status", value="In Review", inline=False)
-        embed.set_footer(
-            text=build_footer_text(REGISTER_REQUEST_MARKER, user_id=interaction.user.id),
-            icon_url=SERVER_ICON
-        )
-
+        embed.set_footer(text="Custom Adversaries Association", icon_url=SERVER_ICON)
 
         channel = self.bot.get_channel(ENTRY_REVIEW_CHANNEL_ID)
         if channel is None:
@@ -143,16 +136,14 @@ class Register(commands.Cog):
             return
 
         old_embed = message.embeds[0]
-        marker_type, marker_values = parse_footer_marker(old_embed.footer.text)
-        if marker_type != REGISTER_REQUEST_MARKER and old_embed.title != "🛎️ Entry Request":
+        if old_embed.title != "🛎️ Entry Request":
             return
 
         if get_embed_field(old_embed, "Status") != "In Review":
             return
 
         applicant_id = (
-            _extract_user_id(marker_values.get("user_id"))
-            or _extract_user_id(get_embed_field(old_embed, "Discord ID"))
+            _extract_user_id(get_embed_field(old_embed, "Discord ID"))
             or _extract_user_id(get_embed_field(old_embed, "Discord User"))
         )
         rbluser = get_embed_field(old_embed, "Roblox User")
@@ -177,10 +168,6 @@ class Register(commands.Cog):
         )
         replace_embed_field(new_embed, "Status", status_value, inline=False)
         replace_embed_field(new_embed, "Discord ID", str(applicant.id), inline=False)
-        new_embed.set_footer(
-            text=build_footer_text(REGISTER_REQUEST_MARKER, user_id=applicant.id),
-            icon_url=SERVER_ICON
-        )
 
         if str(payload.emoji) == '✅':
             intern_role = get_intern_role(guild)
@@ -199,6 +186,12 @@ class Register(commands.Cog):
 
         if str(payload.emoji) == '✅':
             await channel.send(f'<@{applicant.id}> ({rbluser}) has been promoted to Intern.')
+            try:
+                await applicant.send(
+                    "Your application was approved. You have been accepted into the CAA as an Intern."
+                )
+            except discord.HTTPException:
+                pass
         else:
             await channel.send(f'<@{applicant.id}> has been denied.')
 

@@ -14,10 +14,7 @@ from config import (
     get_intern_role,
 )
 from review_utils import (
-    PROMOTION_REQUEST_MARKER,
-    build_footer_text,
     get_embed_field,
-    parse_footer_marker,
     replace_embed_field,
     safe_embed_value,
 )
@@ -71,7 +68,7 @@ class PromoteModal(discord.ui.Modal):
         embed.add_field(name="Applicant", value=interaction.user.mention, inline=False)
         embed.add_field(name="Discord ID", value=str(interaction.user.id), inline=False)
         embed.add_field(
-            name="Roblox Name / Nickname",
+            name="Roblox Name",
             value=safe_embed_value(roblox_name),
             inline=False,
         )
@@ -83,10 +80,7 @@ class PromoteModal(discord.ui.Modal):
         embed.add_field(name="References", value=self.references.value, inline=False)
         embed.add_field(name="Statement", value=self.statement.value, inline=False)
         embed.add_field(name="Status", value="In Review", inline=False)
-        embed.set_footer(
-            text=build_footer_text(PROMOTION_REQUEST_MARKER, user_id=interaction.user.id),
-            icon_url=SERVER_ICON,
-        )
+        embed.set_footer(text="Custom Adversaries Association", icon_url=SERVER_ICON)
 
         message = await channel.send(embed=embed)
         await message.add_reaction("✅")
@@ -188,15 +182,14 @@ class Promote(commands.Cog):
             return
 
         embed = message.embeds[0]
-        marker_type, marker_values = parse_footer_marker(embed.footer.text)
-        if marker_type != PROMOTION_REQUEST_MARKER:
+        if embed.title != "📈 Promotion Request":
             return
 
         current_status = get_embed_field(embed, "Status")
         if current_status != "In Review":
             return
 
-        applicant_id = marker_values.get("user_id") or get_embed_field(embed, "Discord ID")
+        applicant_id = get_embed_field(embed, "Discord ID")
         if not applicant_id:
             return
 
@@ -217,10 +210,6 @@ class Promote(commands.Cog):
             discord.Color.green() if str(payload.emoji) == "✅" else discord.Color.red()
         )
         replace_embed_field(new_embed, "Status", status_value, inline=False)
-        new_embed.set_footer(
-            text=build_footer_text(PROMOTION_REQUEST_MARKER, user_id=applicant.id),
-            icon_url=SERVER_ICON,
-        )
 
         if str(payload.emoji) == "✅":
             employee_role = get_employee_role(guild)

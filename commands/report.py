@@ -71,13 +71,6 @@ class ClockInButton(discord.ui.Button):
 
         self.view.clocked_in.add(interaction.user.id)
 
-        embed = interaction.message.embeds[0]
-        old_icon = embed.footer.icon_url if embed.footer else None
-        embed.set_footer(
-            text=f"{result['participant_count']} clocked in · Custom Adversaries Association",
-            icon_url=old_icon,
-        )
-        await interaction.message.edit(embed=embed)
         await interaction.response.send_message(
             "You're clocked in. Make sure to clock out when the report ends to receive credit.",
             view=self._link_view(), ephemeral=True,
@@ -294,7 +287,7 @@ class ReportModal(discord.ui.Modal):
             embed.add_field(name="NOTES", value=notes_val, inline=False)
         embed.set_thumbnail(url=thumbnail_url)
         embed.set_footer(
-            text="0 clocked in · Custom Adversaries Association",
+            text="Custom Adversaries Association",
             icon_url=SERVER_ICON,
         )
 
