@@ -132,10 +132,10 @@ class PromotionAlerts(commands.Cog):
         )
 
         await channel.send(
-            content=f"@here Promotion follow-up for {member.mention}.",
+            content=f"Promotion follow-up for {member.mention}.",
             embed=embed,
             allowed_mentions=discord.AllowedMentions(
-                everyone=True,
+                everyone=False,
                 users=False,
                 roles=False,
             ),
