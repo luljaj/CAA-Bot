@@ -2,6 +2,8 @@ from discord.ext import commands, tasks
 import os
 import discord
 
+from application_utils import execute_supabase
+
 GUILD_ID = int(os.getenv("GUILDID"))
 REPORT_BAN_ROLE = "Teamer Banned"
 
@@ -26,7 +28,10 @@ class ExpiryCleaner(commands.Cog):
         role = discord.utils.get(guild.roles, name=REPORT_BAN_ROLE)
         if role is None:
             return
-        expired = self.bot.supabase.rpc("get_expired_report_bans").execute().data or []
+        expired_response = await execute_supabase(
+            self.bot.supabase.rpc("get_expired_report_bans")
+        )
+        expired = expired_response.data or []
         for entry in expired:
             member = guild.get_member(entry["user_id"])
             if member and role in member.roles:
@@ -34,7 +39,12 @@ class ExpiryCleaner(commands.Cog):
                     await member.remove_roles(role, reason="Report ban expired")
                 except Exception:
                     pass
-            self.bot.supabase.rpc("unban_user_report", {"user_id": entry["user_id"]}).execute()
+            await execute_supabase(
+                self.bot.supabase.rpc(
+                    "unban_user_report",
+                    {"user_id": entry["user_id"]},
+                )
+            )
 
     @report_bans.before_loop
     async def before_report_bans(self):
@@ -44,7 +54,7 @@ class ExpiryCleaner(commands.Cog):
     async def purge_strikes(self):
         if not self.bot.is_ready():
             return
-        self.bot.supabase.rpc("purge_expired_strikes").execute()
+        await execute_supabase(self.bot.supabase.rpc("purge_expired_strikes"))
 
     @purge_strikes.before_loop
     async def before_purge_strikes(self):

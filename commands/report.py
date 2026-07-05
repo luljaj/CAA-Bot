@@ -5,8 +5,8 @@ import discord
 import time
 import aiohttp
 from datetime import datetime, timedelta, timezone
-import asyncio
 
+from application_utils import execute_supabase
 from config import SERVER_ICON
 
 REPORT_COOLDOWN = 600  # seconds
@@ -57,24 +57,30 @@ class ClockInButton(discord.ui.Button):
         return v
 
     async def callback(self, interaction: Interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
         supabase = interaction.client.supabase
-        result = supabase.rpc("join_report", {
-            "report_id": self.report_id,
-            "user_id": interaction.user.id,
-        }).execute().data
+        response = await execute_supabase(
+            supabase.rpc("join_report", {
+                "report_id": self.report_id,
+                "user_id": interaction.user.id,
+            })
+        )
+        result = response.data
 
         if result["already_joined"]:
-            await interaction.response.send_message(
-                "You've already clocked in to this report.",
-                view=self._link_view(), ephemeral=True,
+            await interaction.edit_original_response(
+                content=(
+                    "You've already clocked in to this report."
+                ),
+                view=self._link_view(),
             )
             return
 
         self.view.clocked_in.add(interaction.user.id)
 
-        await interaction.response.send_message(
-            "You're clocked in. Make sure to clock out when the report ends to receive credit.",
-            view=self._link_view(), ephemeral=True,
+        await interaction.edit_original_response(
+            content="You're clocked in. Make sure to clock out when the report ends to receive credit.",
+            view=self._link_view(),
         )
 
 
@@ -95,14 +101,17 @@ class ClockOutButton(discord.ui.Button):
             )
             return
 
+        await interaction.response.defer(ephemeral=True, thinking=True)
         self.view.clocked_in.discard(interaction.user.id)
         self.view.clocked_out.append(interaction.user.mention)
 
         supabase = interaction.client.supabase
-        supabase.rpc("award_report_credit", {"user_id": interaction.user.id}).execute()
+        await execute_supabase(
+            supabase.rpc("award_report_credit", {"user_id": interaction.user.id})
+        )
 
-        await interaction.response.send_message(
-            "Clocked out. Your service is appreciated.", ephemeral=True,
+        await interaction.edit_original_response(
+            content="Clocked out. Your service is appreciated.",
         )
 
 
@@ -145,9 +154,10 @@ class EndButton(discord.ui.Button):
             await interaction.response.send_message("Not authorized.", ephemeral=True)
             return
 
+        await interaction.response.defer()
         supabase = interaction.client.supabase
-        await asyncio.to_thread(
-            lambda: supabase.rpc("end_report", {"report_id": self.report_id}).execute()
+        await execute_supabase(
+            supabase.rpc("end_report", {"report_id": self.report_id})
         )
 
         clocked_in = self.view.clocked_in.copy()
@@ -166,7 +176,7 @@ class EndButton(discord.ui.Button):
 
         for child in self.view.children:
             child.disabled = True
-        await interaction.response.edit_message(embed=ended, view=self.view)
+        await interaction.message.edit(embed=ended, view=self.view)
 
         if clocked_in:
             clock_out_view = ClockOutView(self.report_id, self.caller_id, clocked_in)
@@ -190,11 +200,10 @@ class ReportView(discord.ui.View):
 
 
 class ReportModal(discord.ui.Modal):
-    def __init__(self, bot, report_num: int, cooldowns: dict):
-        super().__init__(title=f"Report #{report_num}", timeout=None)
+    def __init__(self, bot, cooldowns: dict):
+        super().__init__(title="Teamer Report", timeout=None)
         self.bot = bot
         self.supabase = bot.supabase
-        self.report_num = report_num
         self._cooldowns = cooldowns
         self.roblox_link = discord.ui.TextInput(
             label="Roblox Link",
@@ -215,67 +224,75 @@ class ReportModal(discord.ui.Modal):
             self.add_item(item)
 
     async def on_submit(self, interaction: Interaction):
-        response = await asyncio.to_thread(
-            lambda: self.supabase.rpc("check_reports_lock").execute()
-        )
+        await interaction.response.defer(ephemeral=True, thinking=True)
+
+        response = await execute_supabase(self.supabase.rpc("check_reports_lock"))
         lock_data = response.data
         if lock_data and lock_data.get("is_locked"):
             locked_until = lock_data.get("locked_until")
             if locked_until:
                 dt = datetime.fromisoformat(locked_until.replace("Z", "+00:00"))
                 ts = int(dt.timestamp())
-                await interaction.response.send_message(
-                    f"Reports are locked until <t:{ts}:R>.", ephemeral=True,
+                await interaction.edit_original_response(
+                    content=f"Reports are locked until <t:{ts}:R>.",
                 )
             else:
-                await interaction.response.send_message(
-                    "Reports are currently locked indefinitely.", ephemeral=True,
+                await interaction.edit_original_response(
+                    content="Reports are currently locked indefinitely.",
                 )
             return
 
         ban_role = discord.utils.get(interaction.guild.roles, name=REPORT_BAN_ROLE)
         if ban_role and ban_role in interaction.user.roles:
-            await interaction.response.send_message(
-                "You are banned from making reports.", ephemeral=True,
+            await interaction.edit_original_response(
+                content="You are banned from making reports.",
             )
             return
 
         link = self.roblox_link.value.strip()
         if not (link.startswith("https://www.roblox.com/") or link.startswith("https://roblox.com/")):
-            await interaction.response.send_message(
-                "Invalid Roblox link. Must start with `https://www.roblox.com/` or `https://roblox.com/`.",
-                ephemeral=True,
+            await interaction.edit_original_response(
+                content="Invalid Roblox link. Must start with `https://www.roblox.com/` or `https://roblox.com/`.",
             )
             return
 
         enemy_lines = [line.strip() for line in self.enemies.value.split("\n") if line.strip()]
         if len(enemy_lines) < 3:
-            await interaction.response.send_message(
-                "Must have 3 or more enemies to call a report.", ephemeral=True,
+            await interaction.edit_original_response(
+                content="Must have 3 or more enemies to call a report.",
             )
             return
 
         notes_val = self.notes.value.strip() if self.notes.value else None
+        report_num = (await execute_supabase(
+            self.supabase.rpc("reserve_report_id")
+        )).data
 
-        # All checks passed — lock in the cooldown now
+        # All checks passed; lock in the cooldown now.
         if interaction.user.name != "larnagack":
             self._cooldowns[interaction.user.id] = time.time()
 
-        report_row = self.supabase.rpc("create_report", {
-            "p_id": self.report_num,
-            "caller_id": interaction.user.id,
-            "game": "",
-            "roblox_link": link,
-            "enemies": self.enemies.value,
-            "notes": notes_val,
-            "channel_id": interaction.channel_id,
-        }).execute().data
+        report_response = await execute_supabase(
+            self.supabase.rpc("create_report", {
+                "p_id": report_num,
+                "caller_id": interaction.user.id,
+                "game": "",
+                "roblox_link": link,
+                "enemies": self.enemies.value,
+                "notes": notes_val,
+                "channel_id": interaction.channel_id,
+            })
+        )
+        report_row = report_response.data
 
         report_id = report_row[0]["id"]
 
-        # Roblox headshot — falls back to Discord avatar if lookup fails
+        # Roblox headshot; falls back to Discord avatar if lookup fails.
         thumbnail_url = interaction.user.display_avatar.url
-        stats_data = self.supabase.rpc("fetchstats", params={"uid": interaction.user.id}).execute().data
+        stats_response = await execute_supabase(
+            self.supabase.rpc("fetchstats", params={"uid": interaction.user.id})
+        )
+        stats_data = stats_response.data
         if stats_data and stats_data.get("username"):
             headshot = await _get_roblox_headshot(stats_data["username"])
             if headshot:
@@ -299,19 +316,21 @@ class ReportModal(discord.ui.Modal):
 
         view = ReportView(report_id, interaction.user.id, link)
 
-        await interaction.response.send_message("Report submitted.", ephemeral=True)
         channel = interaction.guild.get_channel(interaction.channel_id)
         message = await channel.send(embed=embed, view=view)
         await channel.send(content=f"<@&{REPORT_PING_ROLE}>")
 
-        self.supabase.rpc("set_report_message", {
-            "report_id": report_id,
-            "message_id": message.id,
-        }).execute()
+        await execute_supabase(
+            self.supabase.rpc("set_report_message", {
+                "report_id": report_id,
+                "message_id": message.id,
+            })
+        )
 
         if not hasattr(self.bot, "active_reports"):
             self.bot.active_reports = {}
         self.bot.active_reports[report_id] = view
+        await interaction.edit_original_response(content="Report submitted.")
 
 
 class Report(commands.Cog):
@@ -340,24 +359,6 @@ class Report(commands.Cog):
             )
             return
 
-        response = await asyncio.to_thread(
-            lambda: self.supabase.rpc("check_reports_lock").execute()
-        )
-        lock_data = response.data
-        if lock_data and lock_data.get("is_locked"):
-            locked_until = lock_data.get("locked_until")
-            if locked_until:
-                dt = datetime.fromisoformat(locked_until.replace("Z", "+00:00"))
-                ts = int(dt.timestamp())
-                await interaction.response.send_message(
-                    f"Reports are locked until <t:{ts}:R>.", ephemeral=True,
-                )
-            else:
-                await interaction.response.send_message(
-                    "Reports are currently locked indefinitely.", ephemeral=True,
-                )
-            return
-
         ban_role = discord.utils.get(interaction.guild.roles, name=REPORT_BAN_ROLE)
         if ban_role and ban_role in interaction.user.roles:
             await interaction.response.send_message(
@@ -365,8 +366,7 @@ class Report(commands.Cog):
             )
             return
 
-        report_num = self.supabase.rpc("reserve_report_id").execute().data
-        await interaction.response.send_modal(ReportModal(self.bot, report_num, self._cooldowns))
+        await interaction.response.send_modal(ReportModal(self.bot, self._cooldowns))
 
     @app_commands.command(name="lockreports", description="Lock reports globally or for a single user.")
     @app_commands.default_permissions(manage_events=True)
@@ -380,6 +380,8 @@ class Report(commands.Cog):
         user: discord.Member = None,
         time_minutes: int = None,
     ):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+
         if user is None:
             if time_minutes is not None:
                 locked_until = (
@@ -387,14 +389,16 @@ class Report(commands.Cog):
                 ).isoformat()
             else:
                 locked_until = None
-            self.supabase.rpc("lock_reports", {"locked_until": locked_until}).execute()
+            await execute_supabase(
+                self.supabase.rpc("lock_reports", {"locked_until": locked_until})
+            )
             if time_minutes:
-                await interaction.response.send_message(
-                    f"Reports locked for {time_minutes} minute(s).", ephemeral=True,
+                await interaction.edit_original_response(
+                    content=f"Reports locked for {time_minutes} minute(s).",
                 )
             else:
-                await interaction.response.send_message(
-                    "Reports locked indefinitely.", ephemeral=True,
+                await interaction.edit_original_response(
+                    content="Reports locked indefinitely.",
                 )
         else:
             ban_role = discord.utils.get(interaction.guild.roles, name=REPORT_BAN_ROLE)
@@ -404,17 +408,18 @@ class Report(commands.Cog):
                 expires_at = (
                     datetime.now(timezone.utc) + timedelta(minutes=time_minutes)
                 ).isoformat()
-                self.supabase.rpc("ban_user_report", {
-                    "user_id": user.id,
-                    "expires_at": expires_at,
-                }).execute()
-                await interaction.response.send_message(
-                    f"{user.mention} is banned from reports for {time_minutes} minute(s).",
-                    ephemeral=True,
+                await execute_supabase(
+                    self.supabase.rpc("ban_user_report", {
+                        "user_id": user.id,
+                        "expires_at": expires_at,
+                    })
+                )
+                await interaction.edit_original_response(
+                    content=f"{user.mention} is banned from reports for {time_minutes} minute(s).",
                 )
             else:
-                await interaction.response.send_message(
-                    f"{user.mention} is permanently banned from reports.", ephemeral=True,
+                await interaction.edit_original_response(
+                    content=f"{user.mention} is permanently banned from reports.",
                 )
 
     @app_commands.command(name="unlockreports", description="Unlock reports globally or for a single user.")
@@ -422,16 +427,20 @@ class Report(commands.Cog):
     @app_commands.guilds(Object(id=GUILD_ID))
     @app_commands.describe(user="Optional. Removes this user's report ban.")
     async def unlockreports(self, interaction: Interaction, user: discord.Member = None):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+
         if user is None:
-            self.supabase.rpc("unlock_reports").execute()
-            await interaction.response.send_message("Reports unlocked.", ephemeral=True)
+            await execute_supabase(self.supabase.rpc("unlock_reports"))
+            await interaction.edit_original_response(content="Reports unlocked.")
         else:
             ban_role = discord.utils.get(interaction.guild.roles, name=REPORT_BAN_ROLE)
             if ban_role and ban_role in user.roles:
                 await user.remove_roles(ban_role, reason=f"Report ban removed by {interaction.user}")
-            self.supabase.rpc("unban_user_report", {"user_id": user.id}).execute()
-            await interaction.response.send_message(
-                f"{user.mention}'s report ban has been removed.", ephemeral=True,
+            await execute_supabase(
+                self.supabase.rpc("unban_user_report", {"user_id": user.id})
+            )
+            await interaction.edit_original_response(
+                content=f"{user.mention}'s report ban has been removed.",
             )
 
 

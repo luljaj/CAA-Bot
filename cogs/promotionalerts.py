@@ -4,7 +4,7 @@ import os
 import discord
 from discord.ext import commands, tasks
 
-from application_utils import fetch_application_record, format_application_date
+from application_utils import fetch_application_record_async, format_application_date
 from config import (
     ENTRY_REVIEW_CHANNEL_ID,
     PROMOTION_REVIEW_CHANNEL_ID,
@@ -165,7 +165,10 @@ class PromotionAlerts(commands.Cog):
             if member.bot or member.id not in rollout_eligible_ids:
                 continue
 
-            application_record = fetch_application_record(self.bot.supabase, member.id)
+            application_record = await fetch_application_record_async(
+                self.bot.supabase,
+                member.id,
+            )
             if not application_record:
                 continue
 

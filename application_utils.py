@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import inspect
 from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -77,8 +79,29 @@ def normalize_application_record(raw_record: Any) -> dict[str, Any] | None:
     }
 
 
+async def execute_supabase(query: Any) -> Any:
+    execute = query.execute
+    if inspect.iscoroutinefunction(execute):
+        return await execute()
+
+    result = await asyncio.to_thread(execute)
+    if inspect.isawaitable(result):
+        return await result
+    return result
+
+
 def fetch_application_record(supabase_client: Any, user_id: int) -> dict[str, Any] | None:
     response = supabase_client.rpc("fetchapplication", params={"uid": user_id}).execute()
+    return normalize_application_record(response.data)
+
+
+async def fetch_application_record_async(
+    supabase_client: Any,
+    user_id: int,
+) -> dict[str, Any] | None:
+    response = await execute_supabase(
+        supabase_client.rpc("fetchapplication", params={"uid": user_id})
+    )
     return normalize_application_record(response.data)
 
 
