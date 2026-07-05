@@ -5,6 +5,7 @@ import discord
 import time
 import aiohttp
 from datetime import datetime, timedelta, timezone
+import asyncio
 
 from config import SERVER_ICON
 
@@ -145,7 +146,9 @@ class EndButton(discord.ui.Button):
             return
 
         supabase = interaction.client.supabase
-        supabase.rpc("end_report", {"report_id": self.report_id}).execute()
+        await asyncio.to_thread(
+            lambda: supabase.rpc("end_report", {"report_id": self.report_id}).execute()
+        )
 
         clocked_in = self.view.clocked_in.copy()
 
@@ -212,7 +215,10 @@ class ReportModal(discord.ui.Modal):
             self.add_item(item)
 
     async def on_submit(self, interaction: Interaction):
-        lock_data = self.supabase.rpc("check_reports_lock").execute().data
+        response = await asyncio.to_thread(
+            lambda: self.supabase.rpc("check_reports_lock").execute()
+        )
+        lock_data = response.data
         if lock_data and lock_data.get("is_locked"):
             locked_until = lock_data.get("locked_until")
             if locked_until:
@@ -334,7 +340,10 @@ class Report(commands.Cog):
             )
             return
 
-        lock_data = self.supabase.rpc("check_reports_lock").execute().data
+        response = await asyncio.to_thread(
+            lambda: self.supabase.rpc("check_reports_lock").execute()
+        )
+        lock_data = response.data
         if lock_data and lock_data.get("is_locked"):
             locked_until = lock_data.get("locked_until")
             if locked_until:
