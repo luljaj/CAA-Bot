@@ -3,6 +3,7 @@ from discord.ext import commands
 import os
 from dotenv import load_dotenv
 from supabase import Client, create_client
+import logging
 
 
 
@@ -49,4 +50,4 @@ async def setup_hook():
     guild = discord.Object(id=GUILD_ID)
     await bot.tree.sync(guild=guild)
 
-bot.run(TOKEN)
+bot.run(TOKEN, log_level=logging.DEBUG, root_logger=True)
