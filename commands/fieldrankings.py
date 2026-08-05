@@ -11,17 +11,17 @@ from config import SERVER_ICON
 GUILD_ID = int(os.getenv("GUILDID"))
 
 
-class Leaderboard(commands.Cog):
+class FieldRankings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.supabase = bot.supabase
 
     @app_commands.command(
-        name="leaderboard",
-        description="View the top 10 report answerers.",
+        name="fieldrankings",
+        description="View the top 10 field operatives by reports answered.",
     )
     @app_commands.guilds(Object(id=GUILD_ID))
-    async def leaderboard(self, interaction: Interaction):
+    async def fieldrankings(self, interaction: Interaction):
         await interaction.response.defer(thinking=True)
 
         response = await execute_supabase(self.supabase.rpc("top_reports"))
@@ -29,7 +29,7 @@ class Leaderboard(commands.Cog):
 
         if not entries:
             await interaction.followup.send(
-                "No report data found.",
+                "No field ranking data found.",
                 ephemeral=True,
             )
             return
@@ -43,7 +43,7 @@ class Leaderboard(commands.Cog):
         )
 
         embed = discord.Embed(
-            title="🏆 REPORTS LEADERBOARD",
+            title="🏆 FIELD RANKINGS",
             description=board,
             color=discord.Color.gold(),
         )
@@ -56,4 +56,4 @@ class Leaderboard(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(Leaderboard(bot))
+    await bot.add_cog(FieldRankings(bot))
