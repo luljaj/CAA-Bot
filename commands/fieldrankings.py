@@ -18,7 +18,7 @@ class FieldRankings(commands.Cog):
 
     @app_commands.command(
         name="fieldrankings",
-        description="View the top 10 field operatives by reports answered.",
+        description="View the top 10 employees by reports answered.",
     )
     @app_commands.guilds(Object(id=GUILD_ID))
     async def fieldrankings(self, interaction: Interaction):
@@ -35,12 +35,17 @@ class FieldRankings(commands.Cog):
             return
 
         medals = ["🥇", "🥈", "🥉"]
-        board = "\n".join(
-            f"{medals[rank - 1] if rank <= 3 else f'#{rank}'} "
-            f"{entry.get('username') or 'Unknown'} — "
-            f"**{entry.get('reports_answered', 0) or 0}**"
-            for rank, entry in enumerate(entries, start=1)
-        )
+        board_lines = []
+        for rank, entry in enumerate(entries, start=1):
+            username = entry.get("username") or "Unknown"
+            rank_label = medals[rank - 1] if rank <= 3 else f"**#{rank}**"
+            name = f"**{username}**" if rank <= 3 else username
+            board_lines.append(
+                f"{rank_label} {name} — "
+                f"**{entry.get('reports_answered', 0) or 0}**"
+            )
+
+        board = "\n".join(board_lines)
 
         embed = discord.Embed(
             title="🏆 FIELD RANKINGS",
