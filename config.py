@@ -9,12 +9,25 @@ SERVER_ICON = "https://images-ext-1.discordapp.net/external/8zvqGh0uPdc05QkNHhjj
 
 ENTRY_REVIEW_CHANNEL_ID = 1382493785400934410
 PROMOTION_REVIEW_CHANNEL_ID = 1508925286702645359
+# Certification applications reuse the existing promotion review channel. Keep
+# the promotion constant above because the legacy follow-up cog still uses it.
+CERTIFICATION_REVIEW_CHANNEL_ID = PROMOTION_REVIEW_CHANNEL_ID
+CERTIFICATION_COMMAND_CHANNEL_NAMES = frozenset({
+    "bot-commands",
+    "hbg-certification",
+})
 
 INTERN_ROLE_ID = 992605675949666315
 INTERN_ROLE_NAME = "Intern"
 
 EMPLOYEE_ROLE_ID = 986120668716363836
 EMPLOYEE_ROLE_NAME = "Employee"
+
+CERTIFICATION_ROLE_ID = int(os.getenv("CERTIFICATION_ROLE_ID", "0") or 0)
+CERTIFICATION_ROLE_NAME = os.getenv(
+    "CERTIFICATION_ROLE_NAME",
+    "Teamer Report Certification",
+)
 
 PROMOTION_ROLLOUT_CUTOFF = os.getenv(
     "PROMOTION_ROLLOUT_CUTOFF",
@@ -43,6 +56,14 @@ def get_intern_role(guild: discord.Guild) -> discord.Role | None:
 
 def get_employee_role(guild: discord.Guild) -> discord.Role | None:
     return get_role(guild, role_id=EMPLOYEE_ROLE_ID, role_name=EMPLOYEE_ROLE_NAME)
+
+
+def get_certification_role(guild: discord.Guild) -> discord.Role | None:
+    return get_role(
+        guild,
+        role_id=CERTIFICATION_ROLE_ID or None,
+        role_name=CERTIFICATION_ROLE_NAME,
+    )
 
 
 def get_promotion_rollout_cutoff() -> datetime:
