@@ -136,6 +136,14 @@ class PositionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.db.writes, [])
         self.assertEqual(self.db.rows[2]["position"], "keep")
 
+    async def test_missing_discord_id_skipped_while_other_rows_sync(self):
+        cog = self.make_cog({2: None}, [member(2, "Director")])
+        rows = [{"discordid": None, "position": "keep"}, self.db.rows[2].copy()]
+        with patch.object(cog, "_registered_rows", AsyncMock(return_value=rows)):
+            result = await cog.reconcile_all()
+        self.assertEqual(self.db.writes, [(2, {"position": "Director"})])
+        self.assertEqual((result.examined, result.skipped, result.changed, result.failed), (2, 1, 1, 0))
+
     async def test_event_during_scan_replays_fresh_state(self):
         cog = self.make_cog({1: "old"}, [member(1, "Intern")])
         async def change():

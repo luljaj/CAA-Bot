@@ -22,6 +22,7 @@ class SyncResult:
     changed: int = 0
     cleared: int = 0
     unchanged: int = 0
+    skipped: int = 0
     failed: int = 0
 
     def summary(self):
@@ -66,7 +67,8 @@ class Positions(commands.Cog):
                     # Coalesce bursts of role edits and reconnect notifications.
                     await asyncio.sleep(1)
                     self._full_pending = False
-                    await self.reconcile_all()
+                    result = await self.reconcile_all()
+                    logger.info("Background position sync: %s", result.summary())
                 else:
                     async with self._write_lock:
                         await self._replay_pending()
@@ -152,7 +154,12 @@ class Positions(commands.Cog):
             try:
                 for start in range(0, len(rows), WRITE_BATCH_SIZE):
                     for row in rows[start:start + WRITE_BATCH_SIZE]:
-                        member = members.get(int(row["discordid"]))
+                        discord_id = row["discordid"]
+                        if discord_id is None:
+                            result.examined += 1
+                            result.skipped += 1
+                            continue
+                        member = members.get(int(discord_id))
                         desired = position_role(member).name if member else None
                         await self._write_position(row, desired, result)
                     await asyncio.sleep(0)
