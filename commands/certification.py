@@ -120,8 +120,6 @@ async def fetch_stats_snapshot(
         "Position": _display_stat(member.top_role.name),
         "Event Wins": _display_stat(stats.get("eventswon")),
         "Referrals": _display_stat(invite_count),
-        "Income": _display_stat(stats.get("donations")),
-        "Points": _display_stat(stats.get("points")),
         "Reports": _display_stat(stats.get("reports_answered")),
         "Awards": _format_awards(stats.get("awards")),
     }

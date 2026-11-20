@@ -57,8 +57,6 @@ class Stats(commands.Cog):
         username = data["username"]
         eventswon = data["eventswon"]
         awards = data["awards"]
-        donations_total = data.get("donations", 0) or 0
-        points_total = data.get("points", 0) or 0
         reports_answered = data.get("reports_answered", 0) or 0
 
         invite_count = 0
@@ -121,8 +119,6 @@ class Stats(commands.Cog):
         embed.add_field(name="PERFORMANCE FILE", value="", inline=False)
         embed.add_field(name="EVENT WINS", value=eventswon, inline=inline)
         embed.add_field(name="REFERRALS", value=invite_count, inline=inline)
-        embed.add_field(name="INCOME", value=donations_total, inline=inline)
-        embed.add_field(name="POINTS", value=points_total, inline=inline)
         embed.add_field(name="REPORTS", value=reports_answered, inline=inline)
         embed.add_field(name = f'AWARDS ({len(awards)})', value = awardsdisplay, inline = False)
         embed.set_thumbnail(url=avatar_url)

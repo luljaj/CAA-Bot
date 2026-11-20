@@ -8,16 +8,12 @@ from config import SERVER_ICON
 GUILD_ID = int(os.getenv("GUILDID"))
 
 RPC_MAP = {
-    "points": "top_points",
-    "income": "top_donations",
     "referrals": "top_recruitment",
     "eventwins": "top_events",
     "reports": "top_reports",
 }
 
 LABEL_MAP = {
-    "points": "POINTS",
-    "income": "INCOME",
     "referrals": "REFERRALS",
     "eventwins": "EVENT WINS",
     "reports": "REPORTS",
@@ -25,8 +21,6 @@ LABEL_MAP = {
 
 # (id_key, value_key) for each category's RPC return schema
 FIELD_MAP = {
-    "points":    ("discordid", "points"),
-    "income":    ("discordid", "donations"),
     "referrals": ("inviter_id", "invite_count"),
     "eventwins": ("discordid", "eventswon"),
     "reports":   ("discordid", "reports_answered"),
@@ -44,8 +38,6 @@ class Podium(commands.Cog):
     )
     @app_commands.describe(category="The category to rank by.")
     @app_commands.choices(category=[
-        app_commands.Choice(name="Points", value="points"),
-        app_commands.Choice(name="Income", value="income"),
         app_commands.Choice(name="Referrals", value="referrals"),
         app_commands.Choice(name="Event Wins", value="eventwins"),
         app_commands.Choice(name="Reports", value="reports"),
