@@ -43,6 +43,7 @@ async def setup_hook():
         if filename.endswith(".py") and filename[:-3] not in _skip:
             await bot.load_extension(f"commands.{filename[:-3]}")
 
+    await bot.load_extension("cogs.positions")
     await bot.load_extension("cogs.frontdoorcleaner")
     await bot.load_extension("cogs.expirycleaner")
     await bot.load_extension("cogs.promotionalerts")

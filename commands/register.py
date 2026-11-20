@@ -1,6 +1,7 @@
 from discord.ext import commands
 from discord import app_commands, Interaction, Object
 import os
+from position_utils import schedule_position_sync
 import re
 import discord
 from datetime import datetime
@@ -65,6 +66,8 @@ class FrontDoor(discord.ui.Modal):
                 "inv": self.inviter.value
             }
         ).execute()
+
+        schedule_position_sync(self.bot, interaction.user.id)
 
         await interaction.response.send_message(
             "Thank you for your application to the CAA.",

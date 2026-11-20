@@ -1,6 +1,7 @@
 from discord.ext import commands
 from discord import app_commands, Interaction, Object
 import os
+from position_utils import schedule_position_sync
 import sqlite3
 import discord
 import requests
@@ -28,6 +29,8 @@ class Addfile(commands.Cog):
             .execute()
             )
         
+        schedule_position_sync(self.bot, user.id)
+
         await interaction.response.send_message(f'{user.mention} has been registered to the database as {self.user.display_name}.')
 
 

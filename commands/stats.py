@@ -6,6 +6,7 @@ from collections import defaultdict
 import aiohttp
 
 from config import SERVER_ICON
+from position_utils import position_role
 
 GUILD_ID = int(os.getenv("GUILDID"))
 
@@ -82,20 +83,7 @@ class Stats(commands.Cog):
         except Exception:
             pass
         
-        rank = user.top_role
-
-        roles = user.roles
-
-        roles.reverse()
-
-        normal = 'Event Winner', 'Server Booster'
-
-        for i in roles:
-            if i.name in normal:
-                continue
-            else:
-                rank = i
-                break
+        rank = position_role(user)
 
         embed = discord.Embed(
             title=f"📂 {user.name} - EMPLOYEE RECORD",
