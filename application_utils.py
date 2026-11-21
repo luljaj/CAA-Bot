@@ -1,13 +1,22 @@
 from __future__ import annotations
 
 import asyncio
+from functools import lru_cache
 import inspect
 from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
 
-APP_TIMEZONE = ZoneInfo("America/New_York")
+@lru_cache(maxsize=1)
+def _app_timezone() -> ZoneInfo:
+    return ZoneInfo("America/New_York")
+
+
+def __getattr__(name: str) -> Any:
+    if name == "APP_TIMEZONE":
+        return _app_timezone()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def parse_datetime(value: Any) -> datetime | None:
@@ -40,10 +49,11 @@ def parse_datetime(value: Any) -> datetime | None:
     else:
         return None
 
+    tz = _app_timezone()
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=APP_TIMEZONE)
+        parsed = parsed.replace(tzinfo=tz)
 
-    return parsed.astimezone(APP_TIMEZONE)
+    return parsed.astimezone(tz)
 
 
 def normalize_application_record(raw_record: Any) -> dict[str, Any] | None:
@@ -108,4 +118,4 @@ async def fetch_application_record_async(
 def format_application_date(value: datetime | None) -> str:
     if value is None:
         return "N/A"
-    return value.astimezone(APP_TIMEZONE).strftime("%Y-%m-%d %H:%M %Z")
+    return value.astimezone(_app_timezone()).strftime("%Y-%m-%d %H:%M %Z")

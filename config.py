@@ -23,6 +23,15 @@ INTERN_ROLE_NAME = "Intern"
 EMPLOYEE_ROLE_ID = 986120668716363836
 EMPLOYEE_ROLE_NAME = "Employee"
 
+DL_LOUNGE_CHANNEL_NAME = "DL Lounge 2"
+DEADLOCK_ROLE_NAME = "Deadlock"
+STAFF_ROLE_NAMES = frozenset({
+    "Secretary",
+    "Vice Secretary",
+    "Senior Staff Member",
+    "Staff Member",
+})
+
 CERTIFICATION_ROLE_ID = int(os.getenv("CERTIFICATION_ROLE_ID", "0") or 0)
 CERTIFICATION_ROLE_NAME = os.getenv(
     "CERTIFICATION_ROLE_NAME",

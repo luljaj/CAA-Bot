@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from supabase import Client, create_client
 import logging
 
+from deadlock.client import DeadlockClient
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,10 +27,14 @@ supabase: Client = create_client(SUPAURL,SUPAKEY)
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
+intents.voice_states = True
 
 bot = commands.Bot(command_prefix="1241243235234234234234",intents=intents)
 
 bot.supabase = supabase
+service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+bot.service_supabase = create_client(SUPAURL, service_role_key) if service_role_key else supabase
+bot.deadlock = DeadlockClient()
 
 @bot.event
 async def on_ready():
@@ -47,6 +53,7 @@ async def setup_hook():
     await bot.load_extension("cogs.frontdoorcleaner")
     await bot.load_extension("cogs.expirycleaner")
     await bot.load_extension("cogs.promotionalerts")
+    await bot.load_extension("cogs.deadlock_lounge")
     logger.info("Loaded bot extensions")
 
     bot.active_reports = {}
