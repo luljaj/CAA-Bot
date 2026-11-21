@@ -12,6 +12,10 @@ MATCH_OUTCOMES = {
     4: "Party penalty",
     5: "Unscored",
 }
+MATCH_TEAM_NAMES = {
+    0: "THE HIDDEN KING",
+    1: "THE ARCHMOTHER",
+}
 
 
 def display_name(profile: dict) -> str:
@@ -132,7 +136,7 @@ def build_match_embed(
         color=discord.Color.blurple(),
     )
     winner = match.get("winning_team") if match.get("match_outcome") in (None, 0) else None
-    for team in (0, 1):
+    for team, team_name in MATCH_TEAM_NAMES.items():
         team_players = sorted(
             (player for player in match["players"] if player.get("team") == team),
             key=_player_sort_key,
@@ -150,7 +154,7 @@ def build_match_embed(
             mention = f" · {member.mention}" if member else ""
             badge = " · **MVP**" if player.get("mvp_rank") == 1 else ""
             scoreboard.append(f"`{kda}` **{hero}**{badge}{mention}")
-        label = f"🏆 TEAM {team + 1} — WINNER" if team == winner else f"TEAM {team + 1}"
+        label = f"🏆 {team_name} — WINNER" if team == winner else team_name
         embed.add_field(name=label, value="\n".join(scoreboard) or "No roster available.", inline=False)
     embed.set_footer(text="Custom Adversaries Association · K/D/A", icon_url=footer_icon or SERVER_ICON)
     return embed
