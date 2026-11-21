@@ -86,18 +86,12 @@ async def show_match(interaction: discord.Interaction, client, supabase, match_i
     embed = build_match_embed(
         match_id, match, heroes, caa_players, footer_icon=_guild_icon_url(interaction.guild)
     )
-    members = {member.id: member for member in caa_players.values() if member.id != interaction.user.id}
-    mentions = " ".join(member.mention for member in members.values())
-
     # Finish the private acknowledgement so the public card is a new message.
     await interaction.edit_original_response(content=f"Opened match `#{match_id}`.")
     await interaction.followup.send(
-        content=f"CAA members in this match · {mentions}" if mentions else None,
         embed=embed,
         ephemeral=False,
-        allowed_mentions=discord.AllowedMentions(
-            everyone=False, roles=False, users=list(members.values()), replied_user=False
-        ),
+        allowed_mentions=discord.AllowedMentions.none(),
     )
     with suppress(discord.NotFound):
         await interaction.delete_original_response()
