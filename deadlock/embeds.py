@@ -48,6 +48,7 @@ def build_player_embed(
     rank: dict | None,
     mvp_matches: set[int],
     *,
+    color: discord.Color | None = None,
     footer_icon: str | None = None,
 ) -> tuple[discord.Embed, list[RecentMatch]]:
     outcomes = Counter(match["player_match_outcome"] for match in matches)
@@ -82,7 +83,7 @@ def build_player_embed(
     embed = discord.Embed(
         title=f"📂 {display_name(profile)} - DEADLOCK RECORD",
         url=profile["profileurl"],
-        color=discord.Color.from_str(rank_asset.get("color") or "#5865F2"),
+        color=color,
     )
     embed.add_field(name=f"STEAM ID #{profile['account_id']}", value="\u200b", inline=False)
     embed.add_field(name="RANK", value=rank_name, inline=True)

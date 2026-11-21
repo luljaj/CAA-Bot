@@ -62,7 +62,10 @@ async def show_linked_record(
         return
 
     embed, recent = build_player_embed(
-        profile, *player_data, footer_icon=_guild_icon_url(getattr(interaction, "guild", None))
+        profile,
+        *player_data,
+        color=employee_record.embed.color,
+        footer_icon=_guild_icon_url(getattr(interaction, "guild", None)),
     )
     await interaction.edit_original_response(
         embed=embed,
