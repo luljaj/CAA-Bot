@@ -45,6 +45,11 @@ async def _find_caa_players(supabase, guild, players: list[dict]) -> dict[int, d
     return members
 
 
+def _guild_icon_url(guild) -> str | None:
+    icon = getattr(guild, "icon", None)
+    return icon.url if icon else None
+
+
 async def show_linked_record(
     interaction: discord.Interaction, client, supabase, employee_record: EmployeeRecord
 ):
@@ -56,7 +61,9 @@ async def show_linked_record(
         await interaction.followup.send(api_error_message(error), ephemeral=True)
         return
 
-    embed, recent = build_player_embed(profile, *player_data)
+    embed, recent = build_player_embed(
+        profile, *player_data, footer_icon=_guild_icon_url(getattr(interaction, "guild", None))
+    )
     await interaction.edit_original_response(
         embed=embed,
         view=DeadlockRecordView(client, supabase, recent, employee_record),
@@ -76,7 +83,9 @@ async def show_match(interaction: discord.Interaction, client, supabase, match_i
         return
 
     caa_players = await _find_caa_players(supabase, interaction.guild, match["players"])
-    embed = build_match_embed(match_id, match, heroes, caa_players)
+    embed = build_match_embed(
+        match_id, match, heroes, caa_players, footer_icon=_guild_icon_url(interaction.guild)
+    )
     members = {member.id: member for member in caa_players.values() if member.id != interaction.user.id}
     mentions = " ".join(member.mention for member in members.values())
 

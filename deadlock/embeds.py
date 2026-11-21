@@ -43,6 +43,8 @@ def build_player_embed(
     ranks: dict[int, dict],
     rank: dict | None,
     mvp_matches: set[int],
+    *,
+    footer_icon: str | None = None,
 ) -> tuple[discord.Embed, list[RecentMatch]]:
     outcomes = Counter(match["player_match_outcome"] for match in matches)
     wins, losses = outcomes[1], outcomes[2]
@@ -93,8 +95,20 @@ def build_player_embed(
     )
     if profile.get("avatarfull"):
         embed.set_thumbnail(url=profile["avatarfull"])
-    embed.set_footer(text="Custom Adversaries Association", icon_url=SERVER_ICON)
+    embed.set_footer(text="Custom Adversaries Association", icon_url=footer_icon or SERVER_ICON)
     return embed, recent
+
+
+def _player_sort_key(player: dict) -> tuple[int, int, int, int]:
+    kills = player.get("kills") or 0
+    deaths = player.get("deaths") or 0
+    assists = player.get("assists") or 0
+    return (
+        1 if player.get("mvp_rank") == 1 else 0,
+        kills + assists,
+        kills,
+        -deaths,
+    )
 
 
 def build_match_embed(
@@ -102,29 +116,41 @@ def build_match_embed(
     match: dict,
     heroes: dict[int, str],
     caa_players: dict[int, discord.Member],
+    *,
+    footer_icon: str | None = None,
 ) -> discord.Embed:
-    embed = discord.Embed(title=f"📂 DEADLOCK MATCH #{match_id}", color=discord.Color.blurple())
+    meta = []
     if start_time := match.get("start_time"):
-        embed.add_field(name="PLAYED", value=f"<t:{start_time}:f>")
+        meta.append(f"<t:{start_time}:f>")
     if (duration := match.get("duration_s")) is not None:
         minutes, seconds = divmod(duration, 60)
-        embed.add_field(name="DURATION", value=f"{minutes}:{seconds:02d}")
+        meta.append(f"Duration `{minutes}:{seconds:02d}`")
+
+    embed = discord.Embed(
+        title=f"📂 DEADLOCK MATCH #{match_id}",
+        description=" · ".join(meta) or None,
+        color=discord.Color.blurple(),
+    )
     winner = match.get("winning_team") if match.get("match_outcome") in (None, 0) else None
     for team in (0, 1):
+        team_players = sorted(
+            (player for player in match["players"] if player.get("team") == team),
+            key=_player_sort_key,
+            reverse=True,
+        )
         scoreboard = []
-        for player in match["players"]:
-            if player.get("team") != team:
-                continue
+        for player in team_players:
             hero_id = player.get("hero_id")
             hero = heroes.get(hero_id, f"Hero #{hero_id}" if hero_id else "Unknown hero")
-            kda = "/".join(str(player.get(stat) or 0) for stat in ("kills", "deaths", "assists"))
+            kills = player.get("kills") or 0
+            deaths = player.get("deaths") or 0
+            assists = player.get("assists") or 0
+            kda = f"{kills:>2}/{deaths:>2}/{assists:>2}"
             member = caa_players.get(player.get("account_id"))
             mention = f" · {member.mention}" if member else ""
             badge = " · **MVP**" if player.get("mvp_rank") == 1 else ""
-            scoreboard.append(f"**{hero}** · `{kda}`{badge}{mention}")
-        label = f"TEAM {team + 1}"
-        if team == winner:
-            label += " · WINNER"
-        embed.add_field(name=label, value="\n".join(scoreboard) or "No roster available.", inline=True)
-    embed.set_footer(text="Custom Adversaries Association · K/D/A", icon_url=SERVER_ICON)
+            scoreboard.append(f"`{kda}` **{hero}**{badge}{mention}")
+        label = f"🏆 TEAM {team + 1} — WINNER" if team == winner else f"TEAM {team + 1}"
+        embed.add_field(name=label, value="\n".join(scoreboard) or "No roster available.", inline=False)
+    embed.set_footer(text="Custom Adversaries Association · K/D/A", icon_url=footer_icon or SERVER_ICON)
     return embed
