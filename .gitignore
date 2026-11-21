@@ -2,5 +2,6 @@
 **/__pycache__/
 *.py[cod]
 .claude
+tests/
 
 *.md
